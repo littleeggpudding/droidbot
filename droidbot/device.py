@@ -1070,13 +1070,19 @@ class Device(object):
                 if done_buttons.count > 0:
                     done_buttons[0].click()
                     time.sleep(0.5)
-                    return True  # 成功跳过
+                    break
                 
                 # 如果没有找到任何按钮，等待并重试
                 time.sleep(0.5)
                 current_attempt += 1
             
-            return False
+            
+            # 如果有ok 就点击一下
+            ok_button = self.u2(text="OK")
+            if ok_button.exists():
+                ok_button.click()
+            
+            return True
         except Exception as e:
             print(f"Error during OmniNotes welcome screen skip: {e}")
             return False

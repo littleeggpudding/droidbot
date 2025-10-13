@@ -442,7 +442,8 @@ class RandomExplorationPolicy(UtgBasedInputPolicy):
         # Get all possible input events
         possible_events = current_state.get_possible_input()
         target_event = self._weighted_random_choice(possible_events)
-        target_event.u2 = self.device.u2
+        if self.device is not None: # skip welcome may not have u2
+            target_event.u2 = self.device.u2
         
         # Update event trace based on event type
         if hasattr(target_event, 'event_type'):

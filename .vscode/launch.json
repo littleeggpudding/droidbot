@@ -150,6 +150,36 @@
         "-count", "10",
         "-d", "emulator-5554"
         ]
-    }
+    },
+
+    {
+        "name": "markor_record",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "args": ["-a", "droidbot/select_apks/net.gsantner.markor/Markor_v2.10.0.apk",
+        "-o", "test_output",
+        "-is_emulator",
+        "-policy", "random_exploration",
+        "-count", "10",
+        "-d", "emulator-5556"
+        ]
+    },
+    {
+        "name": "markor_replay_original",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "args": ["-a", "droidbot/select_apks/net.gsantner.markor/Markor_v2.10.0.apk",
+        "-replay_output", "test_output", 
+        "-is_emulator",
+        "-policy", "replay",
+        "-count", "10",
+        "-o","replay_output_original",
+        "-d", "emulator-5556"
+        ]
+    },
     ]
 }
