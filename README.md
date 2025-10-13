@@ -87,3 +87,8 @@ A sample evaluation report can be found [here](http://honeynet.github.io/droidbo
 
 source ~/.zshrc && conda activate droidbot &i
 pkill -f run_bash.sh
+pip install -e .
+pip install uiautomator2
+pip install rtree
+
+python start.py -a droidbot/apks/v3.10.apk -o test_output -is_emulator -policy random_exploration -count 10 -d emulator-5554

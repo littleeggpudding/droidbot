@@ -12,11 +12,11 @@ export PATH="$PATH:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator"
 source ~/.bashrc
 source /home/shiwensong/.virtualenvs/droidbot/bin/activate
 
-CSV_FILE="droidbot/select_apks/net.gsantner.markor.csv"         # 含 APK 文件名的 CSV（第7列）
-APK_BASE="droidbot/select_apks/net.gsantner.markor"               # 第7列若是文件名，这里就是所在目录
+CSV_FILE="droidbot/select_apks/com.byagowi.persiancalendar_0.csv"         # 含 APK 文件名的 CSV（第7列）
+APK_BASE="droidbot/select_apks/com.byagowi.persiancalendar"               # 第7列若是文件名，这里就是所在目录
 AVD_NAME="Android10.0"                                            # 你的 AVD 名
 COUNT=100                                                          # -count
-MAX_PARALLEL=12                                                   # 并发上限（最多16）
+MAX_PARALLEL=6                                                   # 并发上限（最多16）
 HEADLESS=1                                                        # 1=无窗口; 0=有窗口
 LOG_DIR="./logs"                                                  # 运行日志目录
 START_PY="./start.py"                                             # 你的 start.py 路径
@@ -27,7 +27,7 @@ RUN_COUNT=20                                                       # 同一 APK 
 ########################################
 BASE_PORT=5554
 PORT_STEP=2
-TOTAL_SLOTS=12
+TOTAL_SLOTS=6
 
 ########################################
 # 校验依赖
