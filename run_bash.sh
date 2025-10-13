@@ -9,12 +9,14 @@ export ANDROID_HOME=~/android-sdk
 export ANDROID_SDK_ROOT="$ANDROID_HOME"
 export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
 export PATH="$PATH:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator"
+source ~/.bashrc
+source /home/shiwensong/.virtualenvs/droidbot/bin/activate
 
-CSV_FILE="droidbot/select_apks/it.feio.android.omninotes.csv"         # 含 APK 文件名的 CSV（第7列）
-APK_BASE="droidbot/select_apks/it.feio.android.omninotes"               # 第7列若是文件名，这里就是所在目录
+CSV_FILE="droidbot/select_apks/net.gsantner.markor.csv"         # 含 APK 文件名的 CSV（第7列）
+APK_BASE="droidbot/select_apks/net.gsantner.markor"               # 第7列若是文件名，这里就是所在目录
 AVD_NAME="Android10.0"                                            # 你的 AVD 名
 COUNT=100                                                          # -count
-MAX_PARALLEL=16                                                   # 并发上限（最多16）
+MAX_PARALLEL=12                                                   # 并发上限（最多16）
 HEADLESS=1                                                        # 1=无窗口; 0=有窗口
 LOG_DIR="./logs"                                                  # 运行日志目录
 START_PY="./start.py"                                             # 你的 start.py 路径
@@ -25,7 +27,7 @@ RUN_COUNT=20                                                       # 同一 APK 
 ########################################
 BASE_PORT=5554
 PORT_STEP=2
-TOTAL_SLOTS=16
+TOTAL_SLOTS=12
 
 ########################################
 # 校验依赖

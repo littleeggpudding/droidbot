@@ -86,3 +86,4 @@ A sample evaluation report can be found [here](http://honeynet.github.io/droidbo
 :
 
 source ~/.zshrc && conda activate droidbot &i
+pkill -f run_bash.sh
