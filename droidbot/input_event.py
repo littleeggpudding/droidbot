@@ -97,7 +97,17 @@ class InputEvent(object):
         self.log_lines = None
 
     def to_dict(self):
-        return self.__dict__
+        # 过滤掉不可序列化的对象
+        result = {}
+        for key, value in self.__dict__.items():
+            # 跳过不可序列化的对象
+            if key in ['u2', 'device']:
+                continue
+            # 跳过函数和方法
+            if callable(value):
+                continue
+            result[key] = value
+        return result
 
     def to_json(self):
         return json.dumps(self.to_dict())
@@ -409,6 +419,7 @@ class UIEvent(InputEvent):
     """
     def __init__(self):
         super().__init__()
+        self.u2 = None
 
     def send(self, device):
         raise NotImplementedError
@@ -470,10 +481,29 @@ class TouchEvent(UIEvent):
         return TouchEvent(x, y)
 
     def send(self, device):
-        x, y = UIEvent.get_xy(x=self.x, y=self.y, view=self.view)
-        device.view_long_touch(x=x, y=y, duration=200)
+        if self.u2 is not None:
+            self._click_by_match_info()
+            time.sleep(0.5)
+        else:
+            x, y = UIEvent.get_xy(x=self.x, y=self.y, view=self.view)
+            device.view_long_touch(x=x, y=y, duration=200)
         return True
 
+    def _click_by_match_info(self):
+        if self.view['content_description'] is not None:
+            self.u2(description=self.view['content_description'], instance=self.view['instance']).click()
+        elif self.view['text'] is not None:
+            self.u2(text=self.view['text'], instance=self.view['instance']).click()
+        elif self.view['resource_id'] is not None:
+            self.u2(resourceId=self.view['resource_id'], instance=self.view['instance']).click()
+        elif self.view['class'] is not None:
+            self.u2(className=self.view['class'], instance=self.view['instance']).click()
+        else:
+            self.u2(className=self.view['class'],
+                          resourceId=self.view['resource_id'],
+                          instance=self.view['instance']).click()
+        return True
+    
     def get_event_str(self, state):
         if self.view is not None:
             return f"{self.__class__.__name__}({UIEvent.view_str(state, self.view)})"
@@ -502,15 +532,54 @@ class SelectEvent(UIEvent):
             self.__dict__.update(event_dict)
 
     def send(self, device):
-        x, y = UIEvent.get_xy(x=self.x, y=self.y, view=self.view)
+        if self.u2 is not None:
+            self._select_by_u2()
+        else:
+            # 回退到原来的坐标方式
+            x, y = UIEvent.get_xy(x=self.x, y=self.y, view=self.view)
+            if 'special_attr' in self.view:
+                if self.event_type == KEY_UnselectEvent and 'selected' in self.view['special_attr']:
+                    device.view_long_touch(x=x, y=y, duration=200)
+                elif self.event_type == KEY_SelectEvent and 'selected' not in self.view['special_attr']:
+                    device.view_long_touch(x=x, y=y, duration=200)
+            else:
+                device.view_long_touch(x=x, y=y, duration=200)
+        return True
+    
+    def _select_by_u2(self):
+        """使用u2进行选择/取消选择"""
+        content_desc = self.view.get('content_description')
+        text = self.view.get('text')
+        instance = self.view.get('instance')
+        
+        # 检查当前状态，决定是否需要操作
+        should_operate = True
         if 'special_attr' in self.view:
             if self.event_type == KEY_UnselectEvent and 'selected' in self.view['special_attr']:
-                device.view_long_touch(x=x, y=y, duration=200)
+                should_operate = True
             elif self.event_type == KEY_SelectEvent and 'selected' not in self.view['special_attr']:
-                device.view_long_touch(x=x, y=y, duration=200)
+                should_operate = True
+            else:
+                should_operate = False
+        
+        if not should_operate:
+            return
+        
+        # 执行选择操作
+        if content_desc is not None:
+            self.u2(description=content_desc, instance=instance).click()
+        elif text is not None:
+            self.u2(text=text, instance=instance).click()
+        elif self.view.get('resource_id') is not None:
+            self.u2(resourceId=self.view['resource_id'], instance=instance).click()
+        elif self.view.get('class') is not None:
+            self.u2(className=self.view['class'], instance=instance).click()
         else:
-            device.view_long_touch(x=x, y=y, duration=200)
-        return True
+            self.u2(
+                className=self.view['class'],
+                resourceId=self.view['resource_id'],
+                instance=instance
+            ).click()
 
     def get_event_str(self, state):
         if self.view is not None:
@@ -547,10 +616,30 @@ class LongTouchEvent(UIEvent):
         return LongTouchEvent(x, y)
 
     def send(self, device):
-        x, y = UIEvent.get_xy(x=self.x, y=self.y, view=self.view)
-        device.view_long_touch(x=x, y=y, duration=self.duration)
+        if self.u2 is not None:
+            self._long_click_by_match_info()
+            time.sleep(0.5)
+        else:
+            x, y = UIEvent.get_xy(x=self.x, y=self.y, view=self.view)
+            device.view_long_touch(x=x, y=y, duration=self.duration)
         return True
 
+    def _long_click_by_match_info(self):
+    
+        if self.view['content_description'] is not None:
+            self.u2(description=self.view['content_description'], instance=self.view['instance']).long_click()
+        elif self.view['text'] is not None:
+            self.u2(text=self.view['text'], instance=self.view['instance']).long_click()
+        elif self.view['resource_id'] is not None:
+            self.u2(resourceId=self.view['resource_id'], instance=self.view['instance']).long_click()
+        elif self.view['class'] is not None:
+            self.u2(className=self.view['class'], instance=self.view['instance']).long_click()
+        else:
+            self.u2(className=self.view['class'],
+                          resourceId=self.view['resource_id'],
+                          instance=self.view['instance']).long_click()
+        return True
+    
     def get_event_str(self, state):
         if self.view is not None:
             return f"{self.__class__.__name__}({UIEvent.view_str(state, self.view)})"
@@ -598,9 +687,24 @@ class SwipeEvent(UIEvent):
                           end_x=end_x, end_y=end_y)
 
     def send(self, device):
-        start_x, start_y = UIEvent.get_xy(x=self.start_x, y=self.start_y, view=self.start_view)
-        end_x, end_y = UIEvent.get_xy(x=self.end_x, y=self.end_y, view=self.end_view)
-        device.view_drag((start_x, start_y), (end_x, end_y), self.duration)
+        if self.u2 is not None:
+            self._swipe_by_match_info()
+            time.sleep(0.5)
+        else:
+            start_x, start_y = UIEvent.get_xy(x=self.start_x, y=self.start_y, view=self.start_view)
+            end_x, end_y = UIEvent.get_xy(x=self.end_x, y=self.end_y, view=self.end_view)
+            device.view_drag((start_x, start_y), (end_x, end_y), self.duration)
+        return True
+
+    def _swipe_by_match_info(self):
+        if self.start_view['content_description'] is not None:
+            self.u2.swipe(contentDescription=self.start_view['content_description'], instance=self.start_view['instance'], duration=self.duration/1000.0)
+        elif self.start_view['text'] is not None:
+            self.u2.swipe(text=self.start_view['text'], instance=self.start_view['instance'], duration=self.duration/1000.0)
+        else:
+            self.u2.swipe(className=self.start_view['class'],
+                          resourceId=self.start_view['resource_id'],
+                          instance=self.start_view['instance'], duration=self.duration/1000.0)
         return True
 
     def get_event_str(self, state):
@@ -655,39 +759,38 @@ class ScrollEvent(UIEvent):
         return ScrollEvent(x, y, direction)
 
     def send(self, device):
-        if self.view is not None:
-            from .device_state import DeviceState
-            width = DeviceState.get_view_width(view_dict=self.view)
-            height = DeviceState.get_view_height(view_dict=self.view)
-        else:
-            width = device.get_width()
-            height = device.get_height()
+        resourceId = self.view['resource_id']
+        className = self.view['class']
+        instance = self.view['instance']
 
-        x, y = UIEvent.get_xy(x=self.x, y=self.y, view=self.view)
-        if not x or not y:
-            # If no view and no coordinate specified, use the screen center coordinate
-            x = width / 2
-            y = height / 2
 
-        start_x, start_y = x, y
-        end_x, end_y = x, y
-        duration = 500
-
-        if self.direction == "UP":
-            start_y -= height * 2 / 5
-            end_y += height * 2 / 5
-        elif self.direction == "DOWN":
-            start_y += height * 2 / 5
-            end_y -= height * 2 / 5
+        if self.direction == "DOWN":
+            self.u2(
+                className=className,
+                resourceId=resourceId,
+                instance=instance
+            ).scroll.vert.backward(steps=100)
+        elif self.direction == "UP":
+            self.u2(
+                className=className,
+                resourceId=resourceId,
+                instance=instance
+            ).scroll.vert.forward(steps=100)
         elif self.direction == "LEFT":
-            start_x -= width * 2 / 5
-            end_x += width * 2 / 5
+            self.u2(
+                className=className,
+                resourceId=resourceId,
+                instance=instance
+            ).scroll.horiz.forward(max_swipes=100)
         elif self.direction == "RIGHT":
-            start_x += width * 2 / 5
-            end_x -= width * 2 / 5
+            self.u2(
+                className=className,
+                resourceId=resourceId,
+                instance=instance
+            ).scroll.horiz.backward(max_swipes=100)
 
-        device.view_drag((start_x, start_y), (end_x, end_y), duration)
         return True
+
 
     def get_event_str(self, state):
         if self.view is not None:
@@ -724,11 +827,36 @@ class SetTextEvent(UIEvent):
             self.__dict__.update(event_dict)
 
     def send(self, device):
-        x, y = UIEvent.get_xy(x=self.x, y=self.y, view=self.view)
-        touch_event = TouchEvent(x=x, y=y)
-        touch_event.send(device)
-        device.view_set_text(self.text)
+        if self.u2 is not None:
+            self._set_text_by_u2()
+        else:
+            x, y = UIEvent.get_xy(x=self.x, y=self.y, view=self.view)
+            touch_event = TouchEvent(x=x, y=y)
+            touch_event.send(device)
+            device.view_set_text(self.text)
         return True
+    
+    def _set_text_by_u2(self):
+        """使用u2设置文本"""
+        content_desc = self.view.get('content_description')
+        text = self.view.get('text')
+        instance = self.view.get('instance')
+        
+        if content_desc is not None:
+            self.u2(description=content_desc, instance=instance).set_text(self.text)
+        elif text is not None:
+            self.u2(text=text, instance=instance).set_text(self.text)
+        elif self.view.get('resource_id') is not None:
+            self.u2(resourceId=self.view['resource_id'], instance=instance).set_text(self.text)
+        elif self.view.get('class') is not None:
+            self.u2(className=self.view['class'], instance=instance).set_text(self.text)
+        else:
+            self.u2(
+                className=self.view['class'],
+                resourceId=self.view['resource_id'],
+                instance=instance
+            ).set_text(self.text)
+
 
     def get_event_str(self, state):
         if self.view is not None:
@@ -770,6 +898,7 @@ class IntentEvent(InputEvent):
 
     def send(self, device):
         device.send_intent(intent=self.intent)
+        print("DEBUG send_intent: %s" % self.intent)
         return True
 
     def get_event_str(self, state):

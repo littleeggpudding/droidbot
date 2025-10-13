@@ -1,0 +1,155 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations":[
+        {
+            "name": "family_gem_replay_original",
+            "type": "debugpy",
+            "request": "launch",
+            "console": "integratedTerminal",
+            "program": "${workspaceFolder}/start.py",
+            "args": ["-a", "droidbot/apks/Family_Gem_0.7.15.apk",
+            "-replay_output", "test_output", 
+            "-is_emulator",
+            "-policy", "replay",
+            "-count", "10",
+            "-o","replay_output_original"
+        ]
+    },
+
+    {
+        "name": "family_gem_replay_new",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "args": ["-a", "droidbot/apks/Family_Gem_0.8.apk",
+        "-replay_output", "test_output", 
+        "-is_emulator",
+        "-policy", "replay",
+        "-count", "10",
+        "-o","replay_output_new"
+        ]
+    },
+
+    {
+        "name": "family_gem_record",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "args": ["-a", "droidbot/apks/Family_Gem_0.7.15.apk",
+        "-o", "test_output",
+        "-is_emulator",
+        "-policy", "random_exploration",
+        "-count", "30"
+        ]
+    },
+        
+    {
+            "name": "amaze_file_manager_replay_original",
+            "type": "debugpy",
+            "request": "launch",
+            "console": "integratedTerminal",
+            "program": "${workspaceFolder}/start.py",
+            "args": ["-a", "droidbot/apks/v3.10.apk",
+            "-replay_output", "test_output", 
+            "-is_emulator",
+            "-policy", "replay",
+            "-count", "30",
+            "-o","replay_output_original"
+        ]
+    },
+
+    {
+        "name": "amaze_file_manager_replay_new",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "args": ["-a", "droidbot/apks/v3.5.1.apk",
+        "-replay_output", "test_output", 
+        "-is_emulator",
+        "-policy", "replay",
+        "-count", "30",
+        "-o","replay_output_new"
+        ]
+    },
+
+    {
+        "name": "amaze_file_manager_record",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "args": ["-a", "droidbot/apks/v3.10.apk",
+        "-o", "test_output",
+        "-is_emulator",
+        "-policy", "random_exploration",
+        "-count", "30"
+        ]
+    },
+
+    {
+        "name": "omni_notes_replay_new",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "args": ["-a", "droidbot/select_apks/it.feio.android.omninotes/6.1.0.apk",
+        "-replay_output", "test_output", 
+        "-is_emulator",
+        "-policy", "replay",
+        "-count", "30",
+        "-o","replay_output_new"
+        ]
+    },
+
+    {
+        "name": "omni_notes_replay_original",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "args": ["-a", "droidbot/select_apks/it.feio.android.omninotes/6.3.1.apk",
+        "-replay_output", "test_output", 
+        "-is_emulator",
+        "-policy", "replay",
+        "-count", "30",
+        "-o","replay_output_original"
+        ]
+    },
+
+    {
+        "name": "omni_notes_record",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "args": ["-a", "droidbot/select_apks/it.feio.android.omninotes/6.3.1.apk",
+        "-o", "test_output",
+        "-is_emulator",
+        "-policy", "random_exploration",
+        "-count", "10",
+        "-d", "emulator-5556"
+        ]
+    },
+
+    {
+        "name": "omni_notes_record_4.7.2",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "args": ["-a", "droidbot/select_apks/it.feio.android.omninotes/4.7.2.apk",
+        "-o", "test_output",
+        "-is_emulator",
+        "-policy", "random_exploration",
+        "-count", "10",
+        "-d", "emulator-5554"
+        ]
+    }
+    ]
+}

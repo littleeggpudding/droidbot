@@ -4,8 +4,11 @@ import logging
 import random
 from abc import abstractmethod
 
+from droidbot.device_state import DeviceState
+
 from .input_event import InputEvent, KeyEvent, IntentEvent, TouchEvent, ManualEvent, SetTextEvent, KillAppEvent
 from .utg import UTG
+from .utils import generate_html_report
 
 # Max number of restarts
 MAX_NUM_RESTARTS = 5
@@ -24,6 +27,7 @@ EVENT_FLAG_NAVIGATE = "+navigate"
 EVENT_FLAG_TOUCH = "+touch"
 
 # Policy taxanomy
+RANDOM_EXPLORATION = "random_exploration"
 POLICY_NAIVE_DFS = "dfs_naive"
 POLICY_GREEDY_DFS = "dfs_greedy"
 POLICY_NAIVE_BFS = "bfs_naive"
@@ -52,6 +56,7 @@ class InputPolicy(object):
         self.app = app
         self.action_count = 0
         self.master = None
+        self.input_manager=None
 
     def start(self, input_manager):
         """
@@ -59,6 +64,7 @@ class InputPolicy(object):
         :param input_manager: instance of InputManager
         """
         self.action_count = 0
+        self.input_manager = input_manager
         while input_manager.enabled and self.action_count < input_manager.event_count:
             try:
                 # # make sure the first event is go to HOME screen
@@ -70,6 +76,10 @@ class InputPolicy(object):
                 if self.action_count == 0 and self.master is None:
                     event = KillAppEvent(app=self.app)
                 else:
+                    # 在应用启动后立即尝试跳过欢迎界面
+                    if self.action_count == 2:
+                        self.logger.info("App started, attempting to skip welcome screen...")
+                        self.device.skip_welcome(self.app.get_package_name())
                     event = self.generate_event()
                 input_manager.add_event(event)
             except KeyboardInterrupt:
@@ -145,7 +155,8 @@ class UtgBasedInputPolicy(InputPolicy):
             time.sleep(5)
             return KeyEvent(name="BACK")
 
-        self.__update_utg()
+        # self.__update_utg()
+        self.current_state.save2dir()
 
         # update last view trees for humanoid
         if self.device.humanoid is not None:
@@ -346,6 +357,151 @@ class UtgNaiveSearchPolicy(UtgBasedInputPolicy):
             return
         state_activity = state.foreground_activity
         self.explored_views.add((state_activity, view_str))
+
+class RandomExplorationPolicy(UtgBasedInputPolicy):
+    """
+    Random exploration strategy
+    """
+
+    def __init__(self, device, app, random_input):
+        super(RandomExplorationPolicy, self).__init__(device, app, random_input)
+        self.logger = logging.getLogger(self.__class__.__name__)
+        
+
+        self.preferred_buttons = ["yes", "ok", "activate", "detail", "more", "access",
+                                  "allow", "check", "agree", "try", "go", "next"]
+
+        self.__nav_target = None
+        self.__nav_num_steps = -1
+        self.__num_restarts = 0
+        self.__num_steps_outside = 0
+        self.__event_trace = ""
+        self.__missed_states = set()
+        self.__random_explore = False
+
+    def generate_event_based_on_utg(self):
+        """
+        generate an event based on current UTG
+        @return: InputEvent
+        """
+        current_state = self.current_state
+        self.logger.info("Current state: %s" % current_state.state_str)
+        # if current_state.state_str in self.__missed_states:
+        #     self.__missed_states.remove(current_state.state_str)
+        if current_state.get_app_activity_depth(self.app) < 0:
+            # If the app is not in the activity stack
+            start_app_intent = self.app.get_start_intent()
+
+            # It seems the app stucks at some state, has been
+            # 1) force stopped (START, STOP)
+            #    just start the app again by increasing self.__num_restarts
+            # 2) started at least once and cannot be started (START)
+            #    pass to let viewclient deal with this case
+            # 3) nothing
+            #    a normal start. clear self.__num_restarts.
+
+            if self.__event_trace.endswith(EVENT_FLAG_START_APP + EVENT_FLAG_STOP_APP) \
+                    or self.__event_trace.endswith(EVENT_FLAG_START_APP):
+                self.__num_restarts += 1
+                self.logger.info("The app had been restarted %d times.", self.__num_restarts)
+            else:
+                self.__num_restarts = 0
+
+            # Check if we should try to start the app
+            if not self.__event_trace.endswith(EVENT_FLAG_START_APP):
+                if self.__num_restarts > MAX_NUM_RESTARTS:
+                    # If the app had been restarted too many times, enter random mode
+                    msg = "The app had been restarted too many times. Entering random mode."
+                    self.logger.info(msg)
+                    self.__random_explore = True
+                else:
+                    # Start the app
+                    self.__event_trace += EVENT_FLAG_START_APP
+                    self.logger.info("Trying to start the app...")
+                    return IntentEvent(intent=start_app_intent)
+
+        elif current_state.get_app_activity_depth(self.app) > 0:
+            # If the app is in activity stack but is not in foreground
+            self.__num_steps_outside += 1
+
+            if self.__num_steps_outside > MAX_NUM_STEPS_OUTSIDE:
+                # If the app has not been in foreground for too long, try to go back
+                if self.__num_steps_outside > MAX_NUM_STEPS_OUTSIDE_KILL:
+                    stop_app_intent = self.app.get_stop_intent()
+                    go_back_event = IntentEvent(stop_app_intent)
+                else:
+                    go_back_event = KeyEvent(name="BACK")
+                self.__event_trace += EVENT_FLAG_NAVIGATE
+                self.logger.info("Going back to the app...")
+                return go_back_event
+        else:
+            # If the app is in foreground
+            self.__num_steps_outside = 0
+
+
+        # Get all possible input events
+        possible_events = current_state.get_possible_input()
+        target_event = self._weighted_random_choice(possible_events)
+        target_event.u2 = self.device.u2
+        
+        # Update event trace based on event type
+        if hasattr(target_event, 'event_type'):
+            if target_event.event_type in ['touch', 'long_touch', 'swipe', 'scroll', 'set_text', 'select']:
+                self.__event_trace += EVENT_FLAG_TOUCH
+            elif target_event.event_type == 'key':
+                if target_event.name == 'BACK':
+                    self.__event_trace += EVENT_FLAG_NAVIGATE
+                else:
+                    self.__event_trace += EVENT_FLAG_TOUCH
+            elif target_event.event_type == 'intent':
+                # Update event trace based on intent command type
+                intent_cmd = getattr(target_event, 'intent', '')
+                if 'start' in intent_cmd:
+                    self.__event_trace += EVENT_FLAG_START_APP
+                elif 'force-stop' in intent_cmd:
+                    self.__event_trace += EVENT_FLAG_STOP_APP
+                elif 'broadcast' in intent_cmd:
+                    self.__event_trace += EVENT_FLAG_EXPLORE
+                else:
+                    # Default to explore for other intent types
+                    self.__event_trace += EVENT_FLAG_EXPLORE
+        
+        return target_event
+
+    def _weighted_random_choice(self, possible_events):
+        """
+        带权重的随机选择函数
+        - touch: 最高权重 (50%)
+        - scroll: 最低权重 (5%)
+        - 其他: 中等权重 (15% 每个)
+        """
+        if not possible_events:
+            return None
+        
+        # 定义事件类型的权重
+        event_weights = {
+            'touch': 50,          # 最高权重
+            'long_touch': 15,     # 中等权重
+            'swipe': 15,          # 中等权重
+            'set_text': 15,       # 中等权重
+            'select': 15,         # 中等权重
+            'scroll': 5,          # 最低权重
+            'key': 15,            # 中等权重
+            'intent': 2,         # 较低权重
+        }
+        
+        # 为每个事件分配权重
+        weighted_events = []
+        for event in possible_events:
+            event_type = getattr(event, 'event_type', 'unknown')
+            weight = event_weights.get(event_type, 10)  # 默认权重为10
+            weighted_events.extend([event] * weight)
+        
+        # 如果所有事件都没有匹配到权重，回退到原始随机选择
+        if not weighted_events:
+            return random.choice(possible_events)
+        
+        return random.choice(weighted_events)
 
 
 class UtgGreedySearchPolicy(UtgBasedInputPolicy):
@@ -554,7 +710,7 @@ class UtgReplayPolicy(InputPolicy):
         # skip HOME and start app intent
         self.device = device
         self.app = app
-        self.event_idx = 2
+        self.event_idx = 1
         self.num_replay_tries = 0
         self.utg = UTG(device=device, app=app, random_input=None)
         self.last_event = None
@@ -575,65 +731,96 @@ class UtgReplayPolicy(InputPolicy):
                 time.sleep(5)
                 self.num_replay_tries = 0
                 return KeyEvent(name="BACK")
-
+            
             curr_event_idx = self.event_idx
-            self.__update_utg()
-            while curr_event_idx < len(self.event_paths):
+            # self.__update_utg()
+            self.current_state = current_state
+            self.current_state.save2dir()
+            if curr_event_idx < len(self.event_paths):
                 event_path = self.event_paths[curr_event_idx]
                 with open(event_path, "r") as f:
                     curr_event_idx += 1
 
+                    self.logger.info("debug curr_event_idx: " + str(curr_event_idx))
+
                     try:
                         event_dict = json.load(f)
                     except Exception as e:
-                        self.logger.info("Loading %s failed" % event_path)
+                        self.logger.info("Loading %s failed" % event_path + "curr_event_idx: " + str(curr_event_idx))
                         continue
 
-                    if event_dict["start_state"] != current_state.state_str:
-                        continue
-                    if not self.device.is_foreground(self.app):
-                        # if current app is in background, bring it to foreground
-                        component = self.app.get_package_name()
-                        if self.app.get_main_activity():
-                            component += "/%s" % self.app.get_main_activity()
-                        return IntentEvent(Intent(suffix=component))
+                    # if event_dict["start_state"] != current_state.state_str:
+                    #     continue
+                    # if not self.device.is_foreground(self.app):
+                    #     # if current app is in background, bring it to foreground
+                    #     # component = self.app.get_package_name()
+                    #     # if self.app.get_main_activity():
+                    #     #     component += "/%s" % self.app.get_main_activity()
+                    #     return IntentEvent(self.app.get_start_intent())
                     
-                    self.logger.info("Replaying %s" % event_path)
+                    self.logger.info("Replaying %s" % event_path + "curr_event_idx: " + str(curr_event_idx))
                     self.event_idx = curr_event_idx
                     self.num_replay_tries = 0
-                    # return InputEvent.from_dict(event_dict["event"])
+                    
+                    
+                    
                     event = InputEvent.from_dict(event_dict["event"])
+                    event.u2 = self.device.u2
+                    if isinstance(event, IntentEvent):
+                        return event
+                    check_result = self.check_which_exists(event)
+                    print("debug check_result", check_result)
+                    if check_result[0] is None:
+                        self.logger.warning(f"Widget not found for event: {event_path}")
+                        self.logger.info("Stopping replay due to widget not found")
+                        self.current_state.save2dir() # save the current state
+                        self.input_manager.enabled = False
+                        self.input_manager.stop()
+                        break
+                
+
+                    
                     self.last_state = self.current_state
                     self.last_event = event
-                    return event                    
+                    
+                    
+                    return event
 
             time.sleep(5)
 
         # raise InputInterruptedException("No more record can be replayed.")
-    def __update_utg(self):
-        self.utg.add_transition(self.last_event, self.last_state, self.current_state)
+    
+    def check_which_exists(self, event):
+        resource_id = UtgReplayPolicy.__safe_dict_get(event.view, 'resource_id')
+        text = UtgReplayPolicy.__safe_dict_get(event.view, 'text')
+        content_description = UtgReplayPolicy.__safe_dict_get(event.view, 'content_description')
+        class_name = UtgReplayPolicy.__safe_dict_get(event.view, 'class')
+        instance = UtgReplayPolicy.__safe_dict_get(event.view, 'instance')
 
+        u2 = self.device.u2
+        
 
-class ManualPolicy(UtgBasedInputPolicy):
-    """
-    manually explore UFG
-    """
+        if content_description is not None:
+            if u2.exists(description=content_description, instance=instance):
+                return 'content_description', content_description
+        elif text is not None:
+            if u2.exists(text=text, instance=instance):
+                return 'text', text
+        elif resource_id is not None:
+            if u2.exists(resourceId=resource_id, instance=instance):
+                return 'resource_id', resource_id
+        elif class_name is not None:
+            if u2.exists(className=class_name, instance=instance):
+                return 'class_name', class_name
+        elif class_name is not None and resource_id is not None and instance is not None:
+            if u2.exists(className=class_name, resourceId=resource_id, instance=instance):
+                return 'class_resource_instance', (class_name, resource_id, instance)
+        
+        return None, None
+    
 
-    def __init__(self, device, app):
-        super(ManualPolicy, self).__init__(device, app, False)
-        self.logger = logging.getLogger(self.__class__.__name__)
+    @staticmethod
+    def __safe_dict_get(view_dict, key, default=None):
+        value = view_dict[key] if key in view_dict else None
+        return value if value is not None else default
 
-        self.__first_event = True
-
-    def generate_event_based_on_utg(self):
-        """
-        generate an event based on current UTG
-        @return: InputEvent
-        """
-        if self.__first_event:
-            self.__first_event = False
-            self.logger.info("Trying to start the app...")
-            start_app_intent = self.app.get_start_intent()
-            return IntentEvent(intent=start_app_intent)
-        else:
-            return ManualEvent()

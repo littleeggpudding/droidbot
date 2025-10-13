@@ -25,7 +25,7 @@ class App(object):
             if not os.path.isdir(output_dir):
                 os.makedirs(output_dir)
 
-        from androguard.core.bytecodes.apk import APK
+        from androguard.core.apk import APK
         self.apk = APK(self.app_path)
         self.package_name = self.apk.get_package()
         self.app_name = self.apk.get_app_name()
@@ -62,7 +62,9 @@ class App(object):
         package_name = self.get_package_name()
         if self.get_main_activity():
             package_name += "/%s" % self.get_main_activity()
+        
         return Intent(suffix=package_name)
+
 
     def get_start_with_profiling_intent(self, trace_file, sampling=None):
         """

@@ -188,6 +188,16 @@ class DeviceState(object):
             # from PIL.Image import Image
             # if isinstance(self.screenshot_path, Image):
             #     self.screenshot_path.save(dest_screenshot_path)
+
+            # save the xml file
+            xml_dir = os.path.join(os.path.dirname(output_dir), "xmls")
+            if not os.path.exists(xml_dir):
+                os.makedirs(xml_dir)
+            xml_filename = f"xml_{self.tag}.xml"
+            xml_path = os.path.join(xml_dir, xml_filename)
+            with open(xml_path, 'w', encoding='utf-8') as f:
+                xml_content = self.device.u2.dump_hierarchy()
+                f.write(xml_content)
         except Exception as e:
             self.device.logger.warning(e)
 
@@ -418,7 +428,7 @@ class DeviceState(object):
                     self.__safe_dict_get(view_dict, 'visible') and \
                     self.__safe_dict_get(view_dict, 'resource_id') not in \
                ['android:id/navigationBarBackground',
-                'android:id/statusBarBackground']:
+                'android:id/statusBarBackground']:                
                 enabled_view_ids.append(view_dict['temp_id'])
         # enabled_view_ids.reverse()
 
@@ -442,7 +452,7 @@ class DeviceState(object):
                 touch_exclude_view_ids.union(self.get_all_children(self.views[view_id]))
 
         for view_id in enabled_view_ids:
-            if self.__safe_dict_get(self.views[view_id], 'long_clickable'):
+            if self.__safe_dict_get(self.views[view_id], 'long_clickable') and not self.__safe_dict_get(self.views[view_id], 'class') == 'android.widget.EditText':
                 possible_events.append(LongTouchEvent(view=self.views[view_id]))
 
         for view_id in enabled_view_ids:
@@ -458,7 +468,10 @@ class DeviceState(object):
             children = self.__safe_dict_get(self.views[view_id], 'children')
             if children and len(children) > 0:
                 continue
-            possible_events.append(TouchEvent(view=self.views[view_id]))
+            if self.__safe_dict_get(
+                self.views[view_id], 'clickable'
+            ) or self.__safe_dict_get(self.views[view_id], 'checkable'):
+                possible_events.append(TouchEvent(view=self.views[view_id]))
 
         # For old Android navigation bars
         # possible_events.append(KeyEvent(name="MENU"))

@@ -5,6 +5,8 @@ import subprocess
 import sys
 import time
 
+import uiautomator2
+
 from .adapter.adb import ADB
 from .adapter.droidbot_app import DroidBotAppConn
 from .adapter.logcat import Logcat
@@ -15,7 +17,7 @@ from .adapter.user_input_monitor import UserInputMonitor
 from .adapter.droidbot_ime import DroidBotIme
 from .app import App
 from .intent import Intent
-
+from .adapter.uiautomator2_helper import Uiautomator2_Helper
 DEFAULT_NUM = '1234567890'
 DEFAULT_CONTENT = 'Hello world!'
 
@@ -70,25 +72,30 @@ class Device(object):
         self.__used_ports = []
         self.pause_sending_event = False
 
+        self.u2 = uiautomator2.connect(self.serial)
+        # disable keyboard
+        self.u2.set_fastinput_ime(True)
         # adapters
         self.adb = ADB(device=self)
         self.telnet = TelnetConsole(device=self, auth_token=telnet_auth_token)
-        self.droidbot_app = DroidBotAppConn(device=self)
+        # self.droidbot_app = DroidBotAppConn(device=self)
         self.minicap = Minicap(device=self)
         self.logcat = Logcat(device=self)
         self.user_input_monitor = UserInputMonitor(device=self)
         self.process_monitor = ProcessMonitor(device=self)
-        self.droidbot_ime = DroidBotIme(device=self)
+        # self.droidbot_ime = DroidBotIme(device=self)
+        self.uiautomator_helper = Uiautomator2_Helper(device=self, package_name="") # 后面再添加
+
 
         self.adapters = {
             self.adb: True,
             self.telnet: False,
-            self.droidbot_app: True,
+            #self.droidbot_app: True,
             self.minicap: True,
             self.logcat: True,
             self.user_input_monitor: True,
             self.process_monitor: True,
-            self.droidbot_ime: True
+            #self.droidbot_ime: True
         }
 
         # minicap currently not working on emulators
@@ -101,6 +108,7 @@ class Device(object):
             self.logger.info("disable minicap on sdk >= 32")
             self.adapters[self.minicap] = False
 
+    
     def check_connectivity(self):
         """
         check if the device is available
@@ -623,8 +631,9 @@ class Device(object):
         # subprocess.check_call(["adb", "-s", self.serial, "uninstall", app.get_package_name()],
         #                       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         package_name = app.get_package_name()
+        self.uiautomator_helper.package_name = package_name
         if package_name not in self.adb.get_installed_apps():
-            install_cmd = ["adb", "-s", self.serial, "install", "-r"]
+            install_cmd = ["adb", "-s", self.serial, "install", "-r", "-g"]
             if self.grant_perm and self.get_sdk_version() >= 23:
                 install_cmd.append("-g")
             install_cmd.append(app.app_path)
@@ -655,6 +664,7 @@ class Device(object):
 
         self.logger.info("App installed: %s" % package_name)
         self.logger.info("Main activity: %s" % app.get_main_activity())
+    
 
     @staticmethod
     def __parse_main_activity_from_dumpsys_lines(lines):
@@ -860,11 +870,11 @@ class Device(object):
             self.adb.type(text)
 
     def view_set_text(self, text):
-        if self.droidbot_ime.connected:
-            self.droidbot_ime.input_text(text=text, mode=0)
-        else:
-            self.logger.warning("`adb shell input text` doesn't support setting text, appending instead.")
-            self.adb.type(text)
+        # if self.droidbot_ime.connected:
+        #     self.droidbot_ime.input_text(text=text, mode=0)
+        #  else:
+        self.logger.warning("`adb shell input text` doesn't support setting text, appending instead.")
+        self.adb.type(text)
 
     def key_press(self, key_code):
         self.adb.press(key_code)
@@ -880,12 +890,18 @@ class Device(object):
                 return views
             else:
                 self.logger.warning("Failed to get views using OpenCV.")
-        if self.droidbot_app and self.adapters[self.droidbot_app]:
-            views = self.droidbot_app.get_views()
+        if self.uiautomator_helper:
+            views = self.uiautomator_helper.get_views()
             if views:
                 return views
             else:
-                self.logger.warning("Failed to get views using Accessibility.")
+                self.logger.warning("Failed to get views using UiAutomator.")
+        # if self.droidbot_app and self.adapters[self.droidbot_app]:
+        #     views = self.droidbot_app.get_views()
+        #     if views:
+        #         return views
+        #     else:
+        #         self.logger.warning("Failed to get views using Accessibility.")
 
         self.logger.warning("failed to get current views!")
         return None
@@ -916,3 +932,177 @@ class Device(object):
         if self.minicap.check_connectivity():
             print("[CONNECTION] %s is reconnected." % self.minicap.__class__.__name__)
         self.pause_sending_event = False
+
+
+    def skip_welcome(self, app_package=None):
+        """
+        尝试跳过应用的欢迎页面
+        :param app_package: 应用的包名，如果为 None 则使用当前应用
+        :return: 是否成功跳过欢迎页
+
+        需要case by case 处理
+        """
+
+        if app_package == "it.feio.android.omninotes" or app_package == "net.gsantner.markor":
+            self.skip_omninotes_welcome()
+        elif app_package == "com.ichi2.anki":
+            self.skip_anki_welcome()
+        elif app_package == "com.vrem.wifianalyzer":
+            self.skip_wifianalyzer_welcome()
+        else:
+            return
+
+    def skip_anki_welcome(self):
+        """
+        Skip the Anki welcome/onboarding screens
+
+        Steps:
+        //*[@resource-id="com.ichi2.anki:id/get_started"]
+        //*[@resource-id="com.ichi2.anki:id/switch_widget"]
+        ALLOW
+        //*[@resource-id="com.ichi2.anki:id/continue_button"]
+        Back
+        """
+        try:
+            start_time = time.time()
+            # Maximum number of attempts to prevent infinite loop
+            max_attempts = 6
+            current_attempt = 0
+
+            # Step 1: Click "Get Started"
+            get_started_button = self.u2(resourceId="com.ichi2.anki:id/get_started")
+            if get_started_button.exists():
+                get_started_button.click()
+                time.sleep(1)
+                current_attempt += 1
+
+            # Step 2: Click "Switch Widget"
+            switch_widget_button = self.u2(resourceId="com.ichi2.anki:id/switch_widget")
+            if switch_widget_button.exists():
+                switch_widget_button.click()
+                time.sleep(1)
+                current_attempt += 1
+
+            # Step 3: Handle permission dialogs
+            permission_texts = ["OK", "ALLOW", "允许", "确定"]
+            for text in permission_texts:
+                permission_button = self.u2(text=text)
+                if permission_button.exists():
+                    permission_button.click()
+                    time.sleep(1)
+                    current_attempt += 1
+                    break
+
+            # Step 4: Click "Continue"
+            continue_button = self.u2(resourceId="com.ichi2.anki:id/continue_button")
+            if continue_button.exists():
+                continue_button.click()
+                time.sleep(1)
+                current_attempt += 1
+
+            # Step 5: Press Back
+            self.u2.press("back")
+            time.sleep(1)
+            current_attempt += 1
+
+            end_time = time.time()
+            print(f"skip_anki_welcome time: {end_time - start_time} seconds")
+
+            if current_attempt > 0:
+                print(f"Completed Anki welcome page skip after {current_attempt} steps")
+                return True
+            else:
+                print("Unable to skip Anki welcome page")
+                return False
+
+        except Exception as e:
+            print(f"Error during Anki welcome screen skip: {e}")
+            return False
+
+    def skip_omninotes_welcome(self):
+        """
+        Skip the OmniNotes welcome/onboarding screens
+        
+        Steps:
+        1. Repeatedly click the 'next' button
+            # //*[@resource-id="it.feio.android.omninotes:id/next"]
+        2. Finally click the 'done' button to complete onboarding
+            # //*[@resource-id="it.feio.android.omninotes:id/done"]
+        omninotes 4.7.2:
+        continue
+        OK
+        Not now
+
+        """
+        try:
+            max_attempts = 8
+            current_attempt = 0
+
+            continue_button = self.u2(text="continue")
+            if continue_button.exists():
+                continue_button.click()
+
+            # 如果有ok 就先点击一下
+            ok_button = self.u2(text="OK")
+            if ok_button.exists():
+                ok_button.click()
+
+            not_now_button = self.u2(text="Not now")
+            if not_now_button.exists():
+                not_now_button.click()
+
+            while current_attempt < max_attempts:
+                
+                # 模糊查找包含 'next' 的资源 ID
+                next_buttons = self.u2(resourceIdMatches=".*next")
+                # 模糊查找包含 'done' 的资源 ID
+                done_buttons = self.u2(resourceIdMatches=".*done")
+                
+                
+                # 优先处理 'next' 按钮
+                if next_buttons.count > 0:
+                    next_buttons[0].click()
+                    time.sleep(0.5)  # 增加等待时间
+                    current_attempt += 1
+                    continue
+                
+                # 如果找到 'done' 按钮
+                if done_buttons.count > 0:
+                    done_buttons[0].click()
+                    time.sleep(0.5)
+                    return True  # 成功跳过
+                
+                # 如果没有找到任何按钮，等待并重试
+                time.sleep(0.5)
+                current_attempt += 1
+            
+            return False
+        except Exception as e:
+            print(f"Error during OmniNotes welcome screen skip: {e}")
+            return False
+
+    def skip_wifianalyzer_welcome(self):
+        """
+        Skip the WiFi Analyzer welcome/onboarding screens
+
+        Steps:
+        1. cliick "OK"
+        2. click "Allow only while using the app"
+        """
+        try:
+
+            # Step 1: Click "OK"
+            ok_button = self.u2(text="OK")
+            if ok_button.exists():
+                ok_button.click()
+                time.sleep(1)
+
+            # Step 2: Click "Allow only while using the app"
+            allow_button = self.u2(text="Allow only while using the app")
+            if allow_button.exists():
+                allow_button.click()
+                time.sleep(1)
+
+        except Exception as e:
+            print(f"Error during WiFi Analyzer welcome screen skip: {e}")
+            return False

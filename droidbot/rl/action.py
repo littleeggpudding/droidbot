@@ -64,7 +64,7 @@ class EventGenerator:
             # print("action: intent")
             intent_list = self.action["broadcast"]
             intent_type = "adb shell am start -a " + POSSIBLE_BROADCASTS[np.unravel_index(intent_list.argmax(), intent_list.shape)[0]]
-            event = IntentEvent(intent=intent_type)
+            event = IntentEvent(intent_type)
         elif ACTION_TYPES[action_val[0]] == 'key':
             # print("action key press")
             key_press_list = self.action['key']

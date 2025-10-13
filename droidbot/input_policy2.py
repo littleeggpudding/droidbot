@@ -552,7 +552,7 @@ class MemoryGuidedPolicy(UtgBasedInputPolicy):
             # If the app is not in the activity stack
             start_app_intent = self.app.get_start_intent()
             self.logger.info("starting app")
-            return IntentEvent(intent=start_app_intent)
+            return IntentEvent(start_app_intent)
         elif current_state.get_app_activity_depth(self.app) > 0:
             # If the app is in activity stack but is not in foreground
             self._num_steps_outside += 1
@@ -563,7 +563,7 @@ class MemoryGuidedPolicy(UtgBasedInputPolicy):
                     go_back_event = IntentEvent(stop_app_intent)
                 else:
                     start_app_intent = self.app.get_start_intent()
-                    go_back_event = IntentEvent(intent=start_app_intent)
+                    go_back_event = IntentEvent(start_app_intent)
                 self.logger.info("going back to the app")
                 return go_back_event
         else:

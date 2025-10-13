@@ -4,15 +4,14 @@ import subprocess
 import time
 
 from .input_event import EventLog
-from .input_policy import UtgBasedInputPolicy, UtgNaiveSearchPolicy, UtgGreedySearchPolicy, \
+from .input_policy import RANDOM_EXPLORATION, RandomExplorationPolicy, UtgBasedInputPolicy, UtgNaiveSearchPolicy, UtgGreedySearchPolicy, \
                          UtgReplayPolicy, \
-                         ManualPolicy, \
                          POLICY_NAIVE_DFS, POLICY_GREEDY_DFS, \
                          POLICY_NAIVE_BFS, POLICY_GREEDY_BFS, \
                          POLICY_REPLAY, POLICY_MEMORY_GUIDED, POLICY_LLM_GUIDED, \
                          POLICY_MANUAL, POLICY_MONKEY, POLICY_NONE
 
-DEFAULT_POLICY = POLICY_GREEDY_DFS
+DEFAULT_POLICY = RANDOM_EXPLORATION
 DEFAULT_EVENT_INTERVAL = 1
 DEFAULT_EVENT_COUNT = 100000000
 DEFAULT_TIMEOUT = -1
@@ -66,6 +65,8 @@ class InputManager(object):
     def get_input_policy(self, device, app, master):
         if self.policy_name == POLICY_NONE:
             input_policy = None
+        elif self.policy_name == RANDOM_EXPLORATION:
+            input_policy = RandomExplorationPolicy(device, app, self.random_input )
         elif self.policy_name == POLICY_MONKEY:
             input_policy = None
         elif self.policy_name in [POLICY_NAIVE_DFS, POLICY_NAIVE_BFS]:
@@ -80,8 +81,6 @@ class InputManager(object):
             input_policy = LLM_Guided_Policy(device, app, self.random_input)
         elif self.policy_name == POLICY_REPLAY:
             input_policy = UtgReplayPolicy(device, app, self.replay_output)
-        elif self.policy_name == POLICY_MANUAL:
-            input_policy = ManualPolicy(device, app)
         else:
             self.logger.warning("No valid input policy specified. Using policy \"none\".")
             input_policy = None
@@ -94,6 +93,7 @@ class InputManager(object):
         """
         add one event to the event list
         :param event: the event to be added, should be subclass of AppEvent
+        :param action_count: the current action count for logging
         :return:
         """
         if event is None:

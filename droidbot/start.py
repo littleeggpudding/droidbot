@@ -27,7 +27,7 @@ def parse_args():
     #                          "dummy\tadd some fake contacts, SMS log, call log; \n"
     #                          "static\tset environment based on static analysis result; \n"
     #                          "<file>\tget environment policy from a json file.\n")
-    parser.add_argument("-policy", action="store", dest="input_policy", default=input_manager.DEFAULT_POLICY,
+    parser.add_argument("-policy", action="store", dest="input_policy", default=input_manager.POLICY_REPLAY,
                         help='Policy to use for test input generation. '
                              'Default: %s.\nSupported policies:\n' % input_manager.DEFAULT_POLICY +
                              '  \"%s\" -- No event will be sent, user should interact manually with device; \n'

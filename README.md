@@ -83,3 +83,6 @@ A sample evaluation report can be found [here](http://honeynet.github.io/droidbo
 - [DroidBot Blog Posts](http://honeynet.github.io/droidbot/)
 - [droidbotApp Source Code](https://github.com/ylimit/droidbotApp)
 - [How to contact the author](http://ylimit.github.io)
+:
+
+source ~/.zshrc && conda activate droidbot &i
