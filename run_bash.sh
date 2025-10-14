@@ -12,11 +12,11 @@ export PATH="$PATH:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator"
 source ~/.bashrc
 source /home/shiwensong/.virtualenvs/droidbot/bin/activate
 
-CSV_FILE="droidbot/select_apks/com.byagowi.persiancalendar_0.csv"         # 含 APK 文件名的 CSV（第7列）
-APK_BASE="droidbot/select_apks/com.byagowi.persiancalendar"               # 第7列若是文件名，这里就是所在目录
+CSV_FILE="droidbot/select_apks/net.gsantner.markor.csv"         # 含 APK 文件名的 CSV（第7列）
+APK_BASE="droidbot/select_apks/net.gsantner.markor"               # 第7列若是文件名，这里就是所在目录
 AVD_NAME="Android10.0"                                            # 你的 AVD 名
 COUNT=100                                                          # -count
-MAX_PARALLEL=6                                                   # 并发上限（最多16）
+MAX_PARALLEL=8                                                   # 并发上限（最多16）
 HEADLESS=1                                                        # 1=无窗口; 0=有窗口
 LOG_DIR="./logs"                                                  # 运行日志目录
 START_PY="./start.py"                                             # 你的 start.py 路径
@@ -27,7 +27,7 @@ RUN_COUNT=20                                                       # 同一 APK 
 ########################################
 BASE_PORT=5554
 PORT_STEP=2
-TOTAL_SLOTS=6
+TOTAL_SLOTS=8
 
 ########################################
 # 校验依赖
@@ -157,6 +157,14 @@ RUN_ONE() {
   # —— 新增：对同一 APK 重复运行 RUN_COUNT 次（逐次独立拉起/关闭模拟器）——
   local run_idx
   for ((run_idx=1; run_idx<=RUN_COUNT; run_idx++)); do
+    local out_dir="record_output_${suffix}_run${run_idx}"
+
+    # === 如果输出目录已存在，跳过本次 ===
+    if [[ -d "$out_dir" ]]; then
+      log "SKIP" "FOUND existing output, skip (run ${run_idx}): $out_dir"
+      continue
+    fi
+
     # 取一个可用端口（阻塞等待）
     local port=""
     while [[ -z "$port" ]]; do
@@ -165,7 +173,6 @@ RUN_ONE() {
     done
 
     local serial="emulator-$port"
-    local out_dir="record_output_${suffix}_run${run_idx}"
     local run_log="$LOG_DIR/run_${suffix}_run${run_idx}_${port}.log"
 
     log "$serial" "START (run ${run_idx}/${RUN_COUNT}) for $apk_path"
@@ -178,7 +185,6 @@ RUN_ONE() {
       continue
     fi
 
-    # 执行你的命令
     local cmd=( python3 "$START_PY"
       -a "$apk_path"
       -o "$out_dir"
@@ -188,23 +194,24 @@ RUN_ONE() {
       -d "$serial"
     )
 
+    # ====== 测试模式（当前启用）======
+    # log "$serial" "TEST MODE → would run: ${cmd[*]}"
+    # sleep 1
+    # log "$serial" "TEST MODE → pretend finish OK → $out_dir"
+    # ====== 真跑就把上面三行注释掉，并恢复下方 if 块 ======
     log "$serial" "CMD (run ${run_idx}): ${cmd[*]}"
     if "${cmd[@]}" >"$run_log" 2>&1; then
       log "$serial" "DONE OK (run ${run_idx}) → $out_dir"
     else
       log "$serial" "DONE FAIL (run ${run_idx}) (see $run_log)"
     fi
-    # log "$serial" "TEST MODE → would run: ${cmd[*]}"
-    # sleep 5  # 模拟运行时间
-    # log "$serial" "TEST MODE → pretend finish OK → $out_dir"
 
-
-    # 结束后关闭并释放端口
     kill_emulator "$serial"
     log "$serial" "killed, slot freed (run ${run_idx})"
     release_port "$port"
   done
 }
+
 
 ########################################
 # 主循环：最多并发 $MAX_PARALLEL

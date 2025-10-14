@@ -58,7 +58,7 @@
             "-replay_output", "test_output", 
             "-is_emulator",
             "-policy", "replay",
-            "-count", "30",
+            "-count", "10",
             "-o","replay_output_original"
         ]
     },
@@ -73,7 +73,7 @@
         "-replay_output", "test_output", 
         "-is_emulator",
         "-policy", "replay",
-        "-count", "30",
+        "-count", "10",
         "-o","replay_output_new"
         ]
     },
@@ -88,7 +88,7 @@
         "-o", "test_output",
         "-is_emulator",
         "-policy", "random_exploration",
-        "-count", "30"
+        "-count", "10"
         ]
     },
 

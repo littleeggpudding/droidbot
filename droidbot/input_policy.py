@@ -779,7 +779,6 @@ class UtgReplayPolicy(InputPolicy):
                         self.input_manager.stop()
                         break
                 
-
                     
                     self.last_state = self.current_state
                     self.last_event = event
@@ -790,6 +789,21 @@ class UtgReplayPolicy(InputPolicy):
             time.sleep(5)
 
         # raise InputInterruptedException("No more record can be replayed.")
+    
+    def check_if_same(self, current, record):
+        if current is None or record is None:
+            return False
+        if current == record:
+            return True
+        return False
+
+    def replace_view(self, event, current_view):
+        event.view['resource_id'] = current_view['resource_id']
+        event.view['text'] = current_view['text']
+        event.view['content_description'] = current_view['content_description']
+        event.view['class'] = current_view['class']
+        event.view['instance'] = current_view['instance']
+        event.view['bounds'] = current_view['bounds']
     
     def check_which_exists(self, event):
         resource_id = UtgReplayPolicy.__safe_dict_get(event.view, 'resource_id')
@@ -803,18 +817,38 @@ class UtgReplayPolicy(InputPolicy):
 
         if content_description is not None:
             if u2.exists(description=content_description, instance=instance):
+                for current_view in self.current_state.views:
+                    if self.check_if_same(current_view['content_description'], content_description) and self.check_if_same(current_view['instance'], instance):
+                        self.replace_view(event, current_view)
+                        break
                 return 'content_description', content_description
         elif text is not None:
             if u2.exists(text=text, instance=instance):
+                for current_view in self.current_state.views:
+                    if self.check_if_same(current_view['text'], text) and self.check_if_same(current_view['instance'], instance):
+                        self.replace_view(event, current_view)
+                        break
                 return 'text', text
         elif resource_id is not None:
             if u2.exists(resourceId=resource_id, instance=instance):
+                for current_view in self.current_state.views:
+                    if self.check_if_same(current_view['resource_id'], resource_id) and self.check_if_same(current_view['instance'], instance):
+                        self.replace_view(event, current_view)
+                        break
                 return 'resource_id', resource_id
         elif class_name is not None:
             if u2.exists(className=class_name, instance=instance):
+                for current_view in self.current_state.views:
+                    if self.check_if_same(current_view['class'], class_name) and self.check_if_same(current_view['instance'], instance):
+                        self.replace_view(event, current_view)
+                        break
                 return 'class_name', class_name
         elif class_name is not None and resource_id is not None and instance is not None:
             if u2.exists(className=class_name, resourceId=resource_id, instance=instance):
+                for current_view in self.current_state.views:
+                    if self.check_if_same(current_view['class'], class_name) and self.check_if_same(current_view['resource_id'], resource_id) and self.check_if_same(current_view['instance'], instance):
+                        self.replace_view(event, current_view)
+                        break
                 return 'class_resource_instance', (class_name, resource_id, instance)
         
         return None, None
