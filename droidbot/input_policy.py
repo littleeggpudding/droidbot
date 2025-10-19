@@ -444,6 +444,12 @@ class RandomExplorationPolicy(UtgBasedInputPolicy):
         # Get all possible input events
         possible_events = current_state.get_possible_input()
         target_event = self._weighted_random_choice(possible_events)
+        
+        if target_event is None:
+            self.logger.info("No possible events available. Trying to go back...")
+            self.__event_trace += EVENT_FLAG_NAVIGATE
+            return KeyEvent(name="BACK")
+        
         if self.device is not None: # skip welcome may not have u2
             target_event.u2 = self.device.u2
         
