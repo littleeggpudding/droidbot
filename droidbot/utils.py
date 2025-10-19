@@ -84,16 +84,18 @@ def md5(input_str):
     import hashlib
     return hashlib.md5(input_str.encode('utf-8')).hexdigest()
 
-def generate_html_report(output_dir, replay_output_dir=None):
+def generate_html_report(output_dir, replay_output_dir=None, out_dir=None):
     """
     Generate a dual-column HTML report comparing record and replay actions
     
     :param output_dir: Directory containing record data (original test output)
     :param replay_output_dir: Directory containing replay data (optional)
+    :param out_dir: Output directory for the complete report (HTML + images). If None, saves in output_dir
     """
     import os
     import json
     import glob
+    import shutil
     
     # Determine if this is a replay comparison
     is_replay_comparison = replay_output_dir is not None and os.path.exists(replay_output_dir)
@@ -116,44 +118,72 @@ def generate_html_report(output_dir, replay_output_dir=None):
         replay_event_files = []
         replay_states_dir = None
     
-    # Load events
-    record_events = []
-    for event_file in record_event_files:
-        try:
-            with open(event_file, 'r') as f:
-                event_data = json.load(f)
-                record_events.append(event_data)
-        except Exception as e:
-            print(f"Error loading {event_file}: {e}")
+    # Load events with numeric indices from filenames (event_<idx>.json)
+    def _load_indexed_events(event_paths):
+        events_by_idx = {}
+        for event_file in event_paths:
+            try:
+                base = os.path.basename(event_file)
+                name, _ = os.path.splitext(base)
+                # support both event_2025-... and event_<num>
+                idx = None
+                try:
+                    idx = int(name.split('_')[-1])
+                except Exception:
+                    idx = None
+                with open(event_file, 'r') as f:
+                    data = json.load(f)
+                events_by_idx[idx] = data if idx is not None else data
+            except Exception as e:
+                print(f"Error loading {event_file}: {e}")
+        return events_by_idx
     
-    replay_events = []
-    for event_file in replay_event_files:
-        try:
-            with open(event_file, 'r') as f:
-                event_data = json.load(f)
-                replay_events.append(event_data)
-        except Exception as e:
-            print(f"Error loading {event_file}: {e}")
+    record_events = _load_indexed_events(record_event_files)
+    replay_events = _load_indexed_events(replay_event_files)
     
-    # Generate HTML
+    # Determine output directory structure
+    if out_dir is None:
+        # Use original behavior - save in output_dir
+        final_output_dir = output_dir
+        images_dir = None
+        copy_images = False
+    else:
+        # Create new output structure
+        final_output_dir = out_dir
+        images_dir = os.path.join(out_dir, "tmp")
+        copy_images = True
+        
+        # Create output directories
+        os.makedirs(final_output_dir, exist_ok=True)
+        os.makedirs(images_dir, exist_ok=True)
+    
+    # Generate HTML with updated image paths
     html_content = generate_html_content(record_events, replay_events, 
                                        record_states_dir, replay_states_dir, 
-                                       is_replay_comparison)
+                                       is_replay_comparison, copy_images, images_dir)
     
     # Save HTML file
-    output_file = os.path.join(output_dir, "action_comparison_report.html")
+    output_file = os.path.join(final_output_dir, "action_comparison_report.html")
     with open(output_file, 'w', encoding='utf-8') as f:
         f.write(html_content)
     
+    # Copy images if needed
+    if copy_images:
+        copy_report_images(record_states_dir, replay_states_dir, images_dir)
+    
     print(f"HTML report generated: {output_file}")
+    if copy_images:
+        print(f"Images copied to: {images_dir}")
     return output_file
 
 
-def generate_html_content(record_events, replay_events, record_states_dir, replay_states_dir, is_replay_comparison):
+def generate_html_content(record_events, replay_events, record_states_dir, replay_states_dir, is_replay_comparison, copy_images=False, images_dir=None):
     """Generate the HTML content for the comparison report"""
     
-    # Get maximum number of events to compare
-    max_events = max(len(record_events), len(replay_events))
+    # 获取所有事件索引，确保两列行号同步
+    record_indices = set([k for k in record_events.keys() if isinstance(k, int) and k >= 2])
+    replay_indices = set([k for k in replay_events.keys() if isinstance(k, int) and k >= 2])
+    all_indices = sorted(record_indices | replay_indices)
     
     html = f"""
 <!DOCTYPE html>
@@ -257,25 +287,28 @@ def generate_html_content(record_events, replay_events, record_states_dir, repla
             color: #999;
             font-style: italic;
             padding: 40px;
+            height: 55px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }}
         .screenshot {{
-            max-width: 100%;
-            # height: auto;
             border-radius: 5px;
             margin-top: 10px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            height: 1200px;
+            height: 800px;
+            width: 100%;
+            object-fit: contain;
         }}
         .no-screenshot {{
             background-color: #f8f9fa;
             border: 2px dashed #dee2e6;
             border-radius: 5px;
-            # padding: 20px;
             margin-top: 10px;
             text-align: center;
             color: #6c757d;
             font-style: italic;
-            height: 1200px;
+            height: 796px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -302,7 +335,7 @@ def generate_html_content(record_events, replay_events, record_states_dir, repla
                 {'Record Actions' if is_replay_comparison else 'Actions'}
             </div>
             <div class="column-content">
-                {generate_actions_html(record_events, record_states_dir, 'record')}
+                {generate_synchronized_actions_html(record_events, record_states_dir, 'record', all_indices, copy_images, images_dir)}
             </div>
         </div>
         
@@ -312,7 +345,7 @@ def generate_html_content(record_events, replay_events, record_states_dir, repla
                 Replay Actions
             </div>
             <div class="column-content">
-                {generate_actions_html(replay_events, replay_states_dir, 'replay')}
+                {generate_synchronized_actions_html(replay_events, replay_states_dir, 'replay', all_indices, copy_images, images_dir)}
             </div>
         </div>
         ''' if is_replay_comparison else ''}
@@ -323,7 +356,7 @@ def generate_html_content(record_events, replay_events, record_states_dir, repla
     return html
 
 
-def create_annotated_screenshot(screenshot_path, view_data):
+def create_annotated_screenshot(screenshot_path, view_data, dest_dir=None, suffix=None):
     """
     在截图上绘制bounds矩形标注
     """
@@ -331,16 +364,30 @@ def create_annotated_screenshot(screenshot_path, view_data):
         from PIL import Image, ImageDraw
         import os
         
-        # 如果没有view_data或bounds，直接返回原图
-        if not view_data or 'bounds' not in view_data:
-            return screenshot_path
-            
-        bounds = view_data['bounds']
-        if not bounds or len(bounds) != 2:
-            return screenshot_path
-            
+        # 目标输出目录（如果提供），否则回退到原行为（写入原目录下的 annotation_screenshots）
+        if dest_dir is not None:
+            os.makedirs(dest_dir, exist_ok=True)
+        
+        base_name = os.path.basename(screenshot_path)
+        name, ext = os.path.splitext(base_name)
+        
+        # 如果没有view_data或bounds，则不做标注，仅复制到目标目录（如指定）
+        if not view_data or 'bounds' not in view_data or not view_data['bounds'] or len(view_data['bounds']) != 2:
+            if dest_dir is None:
+                return screenshot_path
+            # 复制原图到目标目录，必要时追加后缀避免冲突
+            filename = f"{name}{suffix}{ext}" if suffix else base_name
+            target_path = os.path.join(dest_dir, filename)
+            try:
+                # 使用PIL保存可避免某些平台权限/时间戳问题
+                Image.open(screenshot_path).save(target_path)
+            except Exception:
+                import shutil
+                shutil.copy2(screenshot_path, target_path)
+            return target_path
+        
         # 解析bounds坐标
-        (x1, y1), (x2, y2) = bounds
+        (x1, y1), (x2, y2) = view_data['bounds']
         
         # 打开原图
         img = Image.open(screenshot_path)
@@ -349,18 +396,20 @@ def create_annotated_screenshot(screenshot_path, view_data):
         # 绘制矩形
         draw.rectangle([x1, y1, x2, y2], outline='red', width=3)
         
-        # 生成新的文件名
-        base_name = os.path.basename(screenshot_path)
-        name, ext = os.path.splitext(base_name)
+        # 生成输出路径
         annotated_name = f"{name}_annotated{ext}"
-        annotated_path = os.path.join(os.path.dirname(screenshot_path), annotated_name)
+        if suffix:
+            annotated_name = f"{name}_annotated{suffix}{ext}"
         
-        # 保存标注后的图片
-        # 先创建目录 annotation_screenshots
-        os.makedirs(f"{os.path.dirname(screenshot_path)}/annotation_screenshots/", exist_ok=True)
-        annotated_path = os.path.join(f"{os.path.dirname(screenshot_path)}/annotation_screenshots/", annotated_name)
+        if dest_dir is None:
+            # 旧行为：写入原 states 目录下的 annotation_screenshots
+            os.makedirs(f"{os.path.dirname(screenshot_path)}/annotation_screenshots/", exist_ok=True)
+            annotated_path = os.path.join(f"{os.path.dirname(screenshot_path)}/annotation_screenshots/", annotated_name)
+        else:
+            # 新行为：直接写入报告输出目录（不污染原始数据）
+            annotated_path = os.path.join(dest_dir, annotated_name)
+        
         img.save(annotated_path)
-        
         return annotated_path
         
     except Exception as e:
@@ -368,7 +417,128 @@ def create_annotated_screenshot(screenshot_path, view_data):
         return screenshot_path
 
 
-def generate_actions_html(events, states_dir, prefix):
+def generate_synchronized_actions_html(events, states_dir, prefix, all_indices, copy_images=False, images_dir=None):
+    """Generate HTML for synchronized actions with consistent row numbers"""
+    import os
+    import glob
+    
+    if not events:
+        return '<div class="no-data">No actions recorded</div>'
+    
+    # 读取截图并解析编号: screen_<idx>.png/jpg
+    screenshot_index_to_path = {}
+    if states_dir and os.path.exists(states_dir):
+        pngs = sorted(glob.glob(os.path.join(states_dir, "screen_*.png")))
+        jpgs = sorted(glob.glob(os.path.join(states_dir, "screen_*.jpg")))
+        for p in pngs + jpgs:
+            base = os.path.basename(p)
+            name, _ = os.path.splitext(base)
+            try:
+                idx = int(name.split('_')[-1])
+                screenshot_index_to_path[idx] = p
+            except Exception:
+                continue
+    
+    html_parts = []
+    
+    # 按统一索引生成，确保行号同步
+    for event_idx in all_indices:
+        # 获取事件数据（按编号）
+        event = events.get(event_idx)
+        action_number = event_idx - 1
+        
+        if event is not None:
+            event_data = event.get('event', {})
+            event_type = event_data.get('event_type', 'unknown')
+            # 安全获取view字段，有些事件可能没有view
+            view_data = event_data.get('view', {}) if 'view' in event_data else {}
+        else:
+            # 占位符：没有对应事件
+            event_data = {}
+            event_type = 'missing'
+            view_data = {}
+        
+        # 对齐截图: screen_idx = event_idx - 1
+        screenshot_html = ""
+        screen_idx = event_idx - 1
+        screenshot_file = screenshot_index_to_path.get(screen_idx)
+        if screenshot_file is not None:
+            annotated_screenshot = create_annotated_screenshot(
+                screenshot_file,
+                view_data,
+                images_dir if (copy_images and images_dir) else None,
+                suffix='_replay' if prefix == 'replay' else None
+            )
+            if copy_images and images_dir:
+                filename = os.path.basename(annotated_screenshot)
+                relative_path = f"tmp/{filename}"
+                screenshot_html = f'<img src="{relative_path}" class="screenshot" alt="Screenshot">'
+            else:
+                screenshot_html = f'<img src="{annotated_screenshot}" class="screenshot" alt="Screenshot">'
+        else:
+            screenshot_html = '<div class="no-screenshot">No screenshot available</div>'
+        
+        # Extract view information (安全获取，避免KeyError)
+        text = view_data.get('text', '') if view_data else 'N/A'
+        resource_id = view_data.get('resource_id', '') if view_data else 'N/A'
+        content_desc = view_data.get('content_description', '') if view_data else 'N/A'
+        class_name = view_data.get('class', '') if view_data else 'N/A'
+        
+        # Format bounds (安全获取)
+        bounds_str = 'N/A'
+        if view_data:
+            bounds = view_data.get('bounds', [])
+            if bounds and len(bounds) == 2:
+                x1, y1 = bounds[0]
+                x2, y2 = bounds[1]
+                bounds_str = f'({x1}, {y1}) - ({x2}, {y2})'
+        
+        # 如果是占位符，显示特殊内容
+        if event is None:
+            event_type_display = 'MISSING'
+            details_content = '<div class="no-data">No corresponding event</div>'
+        else:
+            event_type_display = event_type.upper()
+            details_content = f"""
+                <div class="detail-row">
+                    <span class="detail-label">Text:</span>
+                    <span class="detail-value">{escape_html(text)}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Resource ID:</span>
+                    <span class="detail-value">{escape_html(resource_id)}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Content Desc:</span>
+                    <span class="detail-value">{escape_html(content_desc)}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Class Name:</span>
+                    <span class="detail-value">{escape_html(class_name)}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Bounds:</span>
+                    <span class="detail-value">{bounds_str}</span>
+                </div>
+            """
+        
+        html_parts.append(f"""
+        <div class="action-item">
+            <div class="action-type">
+                <span class="action-number">{action_number}</span>
+                <span class="event-type-{event_type}">{event_type_display}</span>
+            </div>
+            <div class="action-details">
+                {details_content}
+                {screenshot_html}
+            </div>
+        </div>
+        """)
+    
+    return ''.join(html_parts)
+
+
+def generate_actions_html(events, states_dir, prefix, copy_images=False, images_dir=None):
     """Generate HTML for a list of actions"""
     import os
     import glob
@@ -376,53 +546,55 @@ def generate_actions_html(events, states_dir, prefix):
     if not events:
         return '<div class="no-data">No actions recorded</div>'
     
-    # Get sorted screenshot files (按文件名排序)
-    screenshot_files = []
+    # 读取截图并解析编号: screen_<idx>.png/jpg
+    screenshot_index_to_path = {}
     if states_dir and os.path.exists(states_dir):
-        # 先尝试PNG格式
-        screenshot_files = sorted(glob.glob(os.path.join(states_dir, "screen_*.png")))
-        # 如果PNG格式没有文件，再尝试JPG格式
-        if not screenshot_files:
-            screenshot_files = sorted(glob.glob(os.path.join(states_dir, "screen_*.jpg")))
+        pngs = sorted(glob.glob(os.path.join(states_dir, "screen_*.png")))
+        jpgs = sorted(glob.glob(os.path.join(states_dir, "screen_*.jpg")))
+        for p in pngs + jpgs:
+            base = os.path.basename(p)
+            name, _ = os.path.splitext(base)
+            try:
+                idx = int(name.split('_')[-1])
+                screenshot_index_to_path[idx] = p
+            except Exception:
+                continue
     
-    # 转换为绝对路径
-    print(f"screenshot_files: {len(screenshot_files)}")
-    
-    expected_length = len(events) - 1  # 跳过第一个event
-    if len(screenshot_files) < expected_length:
-        # 在前面补None，保持长度一致
-        none_count = expected_length - len(screenshot_files)
-        screenshot_files = [None] * none_count + screenshot_files
     html_parts = []
     
-    # 跳过第一个event（通常是KillAppEvent，没有对应的截图）
-    filtered_events = events[1:] if len(events) > 1 else events
-
-    # 如果是replay，并且screenshot_files比filtered_events多，则手动在尾部给events补None
-    if prefix == 'replay' and len(filtered_events) < len(screenshot_files):
-        filtered_events = filtered_events + [None] * (len(screenshot_files) - len(filtered_events))
+    # 事件编号与截图编号对齐: 跳过 event 1，从 event 2 开始，event N 对应 screen N-1
+    event_indices = sorted([k for k in events.keys() if isinstance(k, int)])
+    aligned_event_indices = [i for i in event_indices if i >= 2]
     
-    for i, event in enumerate(filtered_events):
-        action_number = i + 1  # 从1开始计数，跳过第一个
-        if event is not None:
-            event_data = event.get('event', {})
-        else:
-            event_data = {}
+    for event_idx in aligned_event_indices:
+        # 获取事件数据（按编号）
+        event = events.get(event_idx)
+        action_number = event_idx - 1
+        event_data = event.get('event', {}) if event is not None else {}
         event_type = event_data.get('event_type', 'unknown')
         
         # 安全获取view字段，有些事件可能没有view
         view_data = event_data.get('view', {}) if 'view' in event_data else {}
         
-        # Get screenshot if available (按索引一一对应，跳过第一个event)
+        # 对齐截图: screen_idx = event_idx - 1
         screenshot_html = ""
-        if i < len(screenshot_files):
-            screenshot_file = screenshot_files[i]
-            if screenshot_file is not None:
-                # 创建带标注的截图
-                annotated_screenshot = create_annotated_screenshot(screenshot_file, view_data)
-                screenshot_html = f'<img src="{annotated_screenshot}" class="screenshot" alt="Screenshot">'
+        screen_idx = event_idx - 1
+        screenshot_file = screenshot_index_to_path.get(screen_idx)
+        if screenshot_file is not None:
+            annotated_screenshot = create_annotated_screenshot(
+                screenshot_file,
+                view_data,
+                images_dir if (copy_images and images_dir) else None,
+                suffix='_replay' if prefix == 'replay' else None
+            )
+            if copy_images and images_dir:
+                filename = os.path.basename(annotated_screenshot)
+                relative_path = f"tmp/{filename}"
+                screenshot_html = f'<img src="{relative_path}" class="screenshot" alt="Screenshot">'
             else:
-                screenshot_html = '<div class="no-screenshot">No screenshot available</div>'
+                screenshot_html = f'<img src="{annotated_screenshot}" class="screenshot" alt="Screenshot">'
+        else:
+            screenshot_html = '<div class="no-screenshot">No screenshot available</div>'
         
         # Extract view information (安全获取，避免KeyError)
         text = view_data.get('text', '') if view_data else 'N/A'
@@ -474,6 +646,66 @@ def generate_actions_html(events, states_dir, prefix):
     return ''.join(html_parts)
 
 
+def copy_report_images(record_states_dir, replay_states_dir, images_dir):
+    """Copy all images used in the report to the images directory"""
+    import os
+    import glob
+    import shutil
+    
+    if not images_dir:
+        return
+    
+    # Copy record images
+    if record_states_dir and os.path.exists(record_states_dir):
+        # Copy original screenshots
+        record_screenshots = glob.glob(os.path.join(record_states_dir, "screen_*.png")) + \
+                           glob.glob(os.path.join(record_states_dir, "screen_*.jpg"))
+        
+        for screenshot in record_screenshots:
+            if os.path.exists(screenshot):
+                filename = os.path.basename(screenshot)
+                dest_path = os.path.join(images_dir, filename)
+                shutil.copy2(screenshot, dest_path)
+        
+        # Copy annotated screenshots
+        annotation_dir = os.path.join(record_states_dir, "annotation_screenshots")
+        if os.path.exists(annotation_dir):
+            annotated_files = glob.glob(os.path.join(annotation_dir, "*_annotated.*"))
+            for annotated_file in annotated_files:
+                if os.path.exists(annotated_file):
+                    filename = os.path.basename(annotated_file)
+                    dest_path = os.path.join(images_dir, filename)
+                    shutil.copy2(annotated_file, dest_path)
+    
+    # Copy replay images
+    if replay_states_dir and os.path.exists(replay_states_dir):
+        # Copy original screenshots
+        replay_screenshots = glob.glob(os.path.join(replay_states_dir, "screen_*.png")) + \
+                           glob.glob(os.path.join(replay_states_dir, "screen_*.jpg"))
+        
+        for screenshot in replay_screenshots:
+            if os.path.exists(screenshot):
+                filename = os.path.basename(screenshot)
+                # Add replay prefix to avoid conflicts
+                name, ext = os.path.splitext(filename)
+                replay_filename = f"{name}_replay{ext}"
+                dest_path = os.path.join(images_dir, replay_filename)
+                shutil.copy2(screenshot, dest_path)
+        
+        # Copy annotated screenshots
+        annotation_dir = os.path.join(replay_states_dir, "annotation_screenshots")
+        if os.path.exists(annotation_dir):
+            annotated_files = glob.glob(os.path.join(annotation_dir, "*_annotated.*"))
+            for annotated_file in annotated_files:
+                if os.path.exists(annotated_file):
+                    filename = os.path.basename(annotated_file)
+                    # Add replay prefix to avoid conflicts
+                    name, ext = os.path.splitext(filename)
+                    replay_filename = f"{name}_replay{ext}"
+                    dest_path = os.path.join(images_dir, replay_filename)
+                    shutil.copy2(annotated_file, dest_path)
+
+
 def escape_html(text):
     """Escape HTML special characters"""
     if not text:
@@ -486,4 +718,4 @@ def escape_html(text):
             .replace("'", '&#x27;'))
 
 if __name__ == "__main__":
-    generate_html_report("../test_output", "../replay_output_original")
+    generate_html_report("../record_output_v6_4_1_run1", "../replay_output_v6_5_1_run1_for_v6_4_1", "html_report")

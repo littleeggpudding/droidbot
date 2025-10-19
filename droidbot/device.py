@@ -969,19 +969,26 @@ class Device(object):
             max_attempts = 6
             current_attempt = 0
 
+            # 如果有ok 就先点击一下
+            ok_button = self.u2(text="OK")
+            if ok_button.exists():
+                ok_button.click()
+            
+            allow_button = self.u2(text="Allow")
+            if allow_button.exists():
+                allow_button.click()
+
+
             # Step 1: Click "Get Started"
-            get_started_button = self.u2(resourceId="com.ichi2.anki:id/get_started")
+            get_started_button = self.u2(text="Get Started")
             if get_started_button.exists():
                 get_started_button.click()
-                time.sleep(1)
-                current_attempt += 1
+
 
             # Step 2: Click "Switch Widget"
             switch_widget_button = self.u2(resourceId="com.ichi2.anki:id/switch_widget")
             if switch_widget_button.exists():
                 switch_widget_button.click()
-                time.sleep(1)
-                current_attempt += 1
 
             # Step 3: Handle permission dialogs
             permission_texts = ["OK", "ALLOW", "允许", "确定"]
@@ -989,31 +996,16 @@ class Device(object):
                 permission_button = self.u2(text=text)
                 if permission_button.exists():
                     permission_button.click()
-                    time.sleep(1)
-                    current_attempt += 1
                     break
 
             # Step 4: Click "Continue"
-            continue_button = self.u2(resourceId="com.ichi2.anki:id/continue_button")
+            continue_button = self.u2(text="Continue")
             if continue_button.exists():
                 continue_button.click()
-                time.sleep(1)
-                current_attempt += 1
 
-            # Step 5: Press Back
-            self.u2.press("back")
-            time.sleep(1)
-            current_attempt += 1
 
             end_time = time.time()
             print(f"skip_anki_welcome time: {end_time - start_time} seconds")
-
-            if current_attempt > 0:
-                print(f"Completed Anki welcome page skip after {current_attempt} steps")
-                return True
-            else:
-                print("Unable to skip Anki welcome page")
-                return False
 
         except Exception as e:
             print(f"Error during Anki welcome screen skip: {e}")

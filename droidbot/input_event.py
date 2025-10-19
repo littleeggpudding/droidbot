@@ -179,9 +179,9 @@ class EventLog(object):
         self.device = device
         self.app = app
         self.event = event
-        if tag is None:
-            from datetime import datetime
-            tag = datetime.now().strftime("%Y-%m-%d_%H%M%S")
+        # if tag is None:
+        #     from datetime import datetime
+        #     tag = datetime.now().strftime("%Y-%m-%d_%H%M%S")
         self.tag = tag
 
         self.from_state = None

@@ -17,9 +17,9 @@ class DeviceState(object):
         self.foreground_activity = foreground_activity
         self.activity_stack = activity_stack if isinstance(activity_stack, list) else []
         self.background_services = background_services
-        if tag is None:
-            from datetime import datetime
-            tag = datetime.now().strftime("%Y-%m-%d_%H%M%S")
+        # if tag is None:
+        #     from datetime import datetime
+        #     tag = datetime.now().strftime("%Y-%m-%d_%H%M%S")
         self.tag = tag
         self.screenshot_path = screenshot_path
         self.views = self.__parse_views(views)

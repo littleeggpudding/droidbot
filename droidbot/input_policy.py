@@ -75,13 +75,14 @@ class InputPolicy(object):
                 #     event = IntentEvent(self.app.get_start_intent())
                 if self.action_count == 0 and self.master is None:
                     event = KillAppEvent(app=self.app)
+                    
                 else:
                     # 在应用启动后立即尝试跳过欢迎界面
                     if self.action_count == 2:
-                        self.logger.info("App started, attempting to skip welcome screen...")
+                        self.logger.info("App started,: attempting to skip welcome screen...")
                         self.device.skip_welcome(self.app.get_package_name())
                     event = self.generate_event()
-                input_manager.add_event(event)
+                input_manager.add_event(event, self.action_count)
             except KeyboardInterrupt:
                 break
             except InputInterruptedException as e:
@@ -156,6 +157,7 @@ class UtgBasedInputPolicy(InputPolicy):
             return KeyEvent(name="BACK")
 
         # self.__update_utg()
+        self.current_state.tag = str(self.action_count) # 按action_count命名，方便后续查看
         self.current_state.save2dir()
 
         # update last view trees for humanoid
@@ -705,9 +707,18 @@ class UtgReplayPolicy(InputPolicy):
 
         import os
         event_dir = os.path.join(replay_output, "events")
-        self.event_paths = sorted([os.path.join(event_dir, x) for x in
-                                   next(os.walk(event_dir))[2]
-                                   if x.endswith(".json")])
+        files = [os.path.join(event_dir, x) for x in
+                 next(os.walk(event_dir))[2]
+                 if x.endswith(".json")]
+        def _event_index(path):
+            base = os.path.basename(path)
+            name, _ = os.path.splitext(base)
+            try:
+                return int(name.split('_')[-1])
+            except Exception:
+                return float('inf')
+        # 自然排序：按 event_<num>.json 的 <num> 升序
+        self.event_paths = sorted(files, key=_event_index)
         # skip HOME and start app intent
         self.device = device
         self.app = app
@@ -736,6 +747,7 @@ class UtgReplayPolicy(InputPolicy):
             curr_event_idx = self.event_idx
             # self.__update_utg()
             self.current_state = current_state
+            self.current_state.tag = str(curr_event_idx) # 按events数量命名，方便后续查看
             self.current_state.save2dir()
             if curr_event_idx < len(self.event_paths):
                 event_path = self.event_paths[curr_event_idx]
@@ -744,11 +756,12 @@ class UtgReplayPolicy(InputPolicy):
 
                     self.logger.info("debug curr_event_idx: " + str(curr_event_idx))
 
-                    try:
-                        event_dict = json.load(f)
-                    except Exception as e:
-                        self.logger.info("Loading %s failed" % event_path + "curr_event_idx: " + str(curr_event_idx))
-                        continue
+                    if curr_event_idx!= 2:
+                        try:
+                            event_dict = json.load(f)
+                        except Exception as e:
+                            self.logger.info("Loading %s failed" % event_path + "curr_event_idx: " + str(curr_event_idx))
+                            continue
 
                     # if event_dict["start_state"] != current_state.state_str:
                     #     continue
@@ -763,17 +776,24 @@ class UtgReplayPolicy(InputPolicy):
                     self.event_idx = curr_event_idx
                     self.num_replay_tries = 0
                     
-                    
+                    # 跳过第2个事件，直接返回启动app的Intent
+                    if curr_event_idx == 2: # 有些第二个event是空的
+                        return IntentEvent(self.app.get_start_intent())
                     
                     event = InputEvent.from_dict(event_dict["event"])
                     event.u2 = self.device.u2
                     if isinstance(event, IntentEvent):
                         return event
+                    elif isinstance(event, KeyEvent):
+                        return event
+
+
                     check_result = self.check_which_exists(event)
                     print("debug check_result", check_result)
                     if check_result[0] is None:
                         self.logger.warning(f"Widget not found for event: {event_path}")
                         self.logger.info("Stopping replay due to widget not found")
+                        self.current_state.tag = str(curr_event_idx) # 按events数量命名，方便后续查看
                         self.current_state.save2dir() # save the current state
                         self.input_manager.enabled = False
                         self.input_manager.stop()
