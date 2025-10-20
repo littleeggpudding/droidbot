@@ -949,8 +949,95 @@ class Device(object):
             self.skip_anki_welcome()
         elif app_package == "com.vrem.wifianalyzer":
             self.skip_wifianalyzer_welcome()
+        elif app_package == "com.best.deskclock":
+            self.skip_deskclock_welcome()
+        elif app_package == "org.secuso.privacyfriendlytodolist":
+            self.skip_todolist_welcome()
+        elif app_package == "org.billthefarmer.diary":
+            self.skip_diary_welcome()
+        elif app_package == "com.quran.labs.androidquran":
+            self.skip_quran_welcome()
         else:
             return
+
+    def skip_quran_welcome(self):
+        """
+        Skip the Quran welcome/onboarding screens
+        1. click "Get Started"
+        """
+        try:
+            # Step 1: click Allow
+            skip_button = self.u2(text="Yes")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(10)
+
+            skip_button = self.u2(text="YES")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(10)
+            
+        except Exception as e:
+            print(f"Error during Quran welcome screen skip: {e}")
+
+    def skip_diary_welcome(self):
+        """
+        Skip the Diary welcome/onboarding screens
+        1. click "Get Started"
+        """
+        try:
+            # Step 1: click Allow
+            skip_button = self.u2(text="Allow")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(0.5)
+
+            skip_button = self.u2(text="Allow")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(0.5)
+
+            
+        except Exception as e:
+            print(f"Error during Diary welcome screen skip: {e}")
+
+
+    def skip_todolist_welcome(self):
+        """
+        Skip the TodoList welcome/onboarding screens
+        1. click "Get Started"
+        """
+        try:
+            # Step 1: click SKIP
+            skip_button = self.u2(text="SKIP")
+            if skip_button.exists():
+                skip_button.click()
+
+            return True
+        except Exception as e:
+            print(f"Error during TodoList welcome screen skip: {e}")
+            return False
+
+    def skip_deskclock_welcome(self):
+        """
+        Skip the DeskClock welcome/onboarding screens
+        1. scroll
+        2. click "Later"
+        """
+        try:
+            # Step 1: Scroll
+            self.u2.swipe(0.5, 0.8, 0.5, 0.2) 
+            self.u2.swipe(0.5, 0.8, 0.5, 0.2)
+
+            # Step 2: Click "Later"
+            later_button = self.u2(text="Later")
+            if later_button.exists():
+                later_button.click()
+
+            return True
+        except Exception as e:
+            print(f"Error during DeskClock welcome screen skip: {e}")
+            return False
 
     def skip_anki_welcome(self):
         """
