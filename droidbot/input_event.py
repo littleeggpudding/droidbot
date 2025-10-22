@@ -492,6 +492,7 @@ class TouchEvent(UIEvent):
     def _click_by_match_info(self):
         if self.view['content_description'] is not None:
             self.u2(description=self.view['content_description'], instance=self.view['instance']).click()
+            
         elif self.view['text'] is not None:
             self.u2(text=self.view['text'], instance=self.view['instance']).click()
         elif self.view['resource_id'] is not None:
@@ -534,6 +535,7 @@ class SelectEvent(UIEvent):
     def send(self, device):
         if self.u2 is not None:
             self._select_by_u2()
+            time.sleep(0.5)
         else:
             # 回退到原来的坐标方式
             x, y = UIEvent.get_xy(x=self.x, y=self.y, view=self.view)
@@ -789,6 +791,8 @@ class ScrollEvent(UIEvent):
                 instance=instance
             ).scroll.horiz.backward(max_swipes=100)
 
+        
+        time.sleep(0.5)
         return True
 
 
@@ -829,6 +833,7 @@ class SetTextEvent(UIEvent):
     def send(self, device):
         if self.u2 is not None:
             self._set_text_by_u2()
+            time.sleep(0.5)
         else:
             x, y = UIEvent.get_xy(x=self.x, y=self.y, view=self.view)
             touch_event = TouchEvent(x=x, y=y)

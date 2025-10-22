@@ -98,7 +98,11 @@ def generate_html_report(output_dir, replay_output_dir=None, out_dir=None):
     import shutil
     
     # Determine if this is a replay comparison
+    print(f"output_dir: {output_dir}")
+    print(f"replay_output_dir: {replay_output_dir}")
+    print(f"out_dir: {out_dir}")
     is_replay_comparison = replay_output_dir is not None and os.path.exists(replay_output_dir)
+    print(f"is_replay_comparison: {is_replay_comparison}")
     
     # Get event files
     if is_replay_comparison:
@@ -718,4 +722,4 @@ def escape_html(text):
             .replace("'", '&#x27;'))
 
 if __name__ == "__main__":
-    generate_html_report("../record_output_v6_4_1_run1", "../replay_output_v6_5_1_run1_for_v6_4_1", "html_report")
+    generate_html_report("test_output", "replay_output", "html_report")

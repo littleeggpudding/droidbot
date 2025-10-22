@@ -955,7 +955,7 @@ class Device(object):
             self.skip_todolist_welcome()
         elif app_package == "org.billthefarmer.diary":
             self.skip_diary_welcome()
-        elif app_package == "com.quran.labs.androidquran":
+        elif "com.quran.labs.androidquran" in app_package:
             self.skip_quran_welcome()
         else:
             return
@@ -970,13 +970,15 @@ class Device(object):
             skip_button = self.u2(text="Yes")
             if skip_button.exists():
                 skip_button.click()
-                time.sleep(10)
+                time.sleep(1)
 
             skip_button = self.u2(text="YES")
             if skip_button.exists():
                 skip_button.click()
-                time.sleep(10)
-            
+                time.sleep(1)
+
+            time.sleep(60)
+            return True
         except Exception as e:
             print(f"Error during Quran welcome screen skip: {e}")
 

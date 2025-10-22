@@ -98,11 +98,11 @@
         "request": "launch",
         "console": "integratedTerminal",
         "program": "${workspaceFolder}/start.py",
-        "args": ["-a", "droidbot/select_apks/it.feio.android.omninotes/6.1.0.apk",
-        "-replay_output", "test_output", 
+        "args": ["-a", "droidbot/select_apks/it.feio.android.omninotes/6.2.4.apk",
+        "-replay_output", "record_output_6_2_2_run1", 
         "-is_emulator",
         "-policy", "replay",
-        "-count", "30",
+        "-count", "100",
         "-o","replay_output_new"
         ]
     },
@@ -181,5 +181,119 @@
         "-d", "emulator-5556"
         ]
     },
+    {
+        "name": "start_bash_record_omninotes_parallel2",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start_bash.py",
+        "args": [
+            "record",
+            "--csv-file", "droidbot/select_apks/it.feio.android.omninotes.csv",
+            "--apk-base", "droidbot/select_apks/it.feio.android.omninotes",
+            "--max-parallel", "2"
+        ]
+    },
+    {
+        "name": "anki_record",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "args": ["-a", "droidbot/select_apks/com.ichi2.anki/AnkiDroid_2.22.3_AnkiDroid-2.22.3-full-universal.apk",
+        "-o", "test_output",
+        "-is_emulator",
+        "-policy", "random_exploration",
+        "-count", "100",
+        "-d", "emulator-5554"
+        ]
+    },
+    {
+        "name": "anki_replay",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "args": ["-a", "droidbot/select_apks/com.ichi2.anki/AnkiDroid_2.22.3_AnkiDroid-2.22.3-full-universal.apk",
+        "-replay_output", "test_output",
+        "-o", "replay_output",
+        "-is_emulator",
+        "-policy", "replay",
+        "-count", "100",
+        "-d", "emulator-5554"
+        ]
+    },
+    {
+        "name": "clock_replay",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "args": ["-a", "droidbot/select_apks/com.best.deskclock/Clock_2.25_Clock_2.25-release.apk",
+        "-replay_output", "test_output",
+        "-o", "replay_output",
+        "-is_emulator",
+        "-policy", "replay",
+        "-count", "10",
+        "-d", "emulator-5554"
+        ]
+    },
+    {
+        "name": "clock_record",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "args": ["-a", "droidbot/select_apks/com.best.deskclock/Clock_2.25_Clock_2.25-release.apk",
+        "-o", "test_output",
+        "-is_emulator",
+        "-policy", "random_exploration",
+        "-count", "10",
+        "-d", "emulator-5554"
+        ]
+    },
+    {
+        "name": "decision_maker_record",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "args": ["-a", "droidbot/select_apks/de.markusfisch.android.libra/Version_1.12.2.apk",
+        "-o", "test_output",
+        "-is_emulator",
+        "-policy", "random_exploration",
+        "-count", "10",
+        "-d", "emulator-5554"
+        ]
+    },
+    {
+        "name": "bible_record",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "args": ["-a", "droidbot/select_apks/com.quran.labs.androidquran/Quran_3.0.3_quran-3.0.3.apk",
+        "-o", "test_output",
+        "-is_emulator",
+        "-policy", "random_exploration",
+        "-count", "10",
+        "-d", "emulator-5554"
+        ]
+    },
+    {
+        "name": "demaker_repaly",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "args": ["-a", "droidbot/select_apks/de.markusfisch.android.libra/Version_1.12.2.apk",
+        "-replay_output", "record_output_Version_1_12_2_run2",
+        "-o", "replay_original",
+        "-is_emulator",
+        "-policy", "replay",
+        "-count", "100",
+        "-d", "emulator-5554"
+        ]
+    }
     ]
 }

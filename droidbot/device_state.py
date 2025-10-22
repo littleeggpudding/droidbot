@@ -428,7 +428,77 @@ class DeviceState(object):
                     self.__safe_dict_get(view_dict, 'visible') and \
                     self.__safe_dict_get(view_dict, 'resource_id') not in \
                ['android:id/navigationBarBackground',
-                'android:id/statusBarBackground']:                
+                'android:id/statusBarBackground']:
+                enabled_view_ids.append(view_dict['temp_id'])
+        # enabled_view_ids.reverse()
+
+        for view_id in enabled_view_ids:
+            if self.__safe_dict_get(self.views[view_id], 'clickable'):
+                possible_events.append(TouchEvent(view=self.views[view_id]))
+                touch_exclude_view_ids.add(view_id)
+                touch_exclude_view_ids.union(self.get_all_children(self.views[view_id]))
+
+        for view_id in enabled_view_ids:
+            if self.__safe_dict_get(self.views[view_id], 'scrollable'):
+                possible_events.append(ScrollEvent(view=self.views[view_id], direction="up"))
+                possible_events.append(ScrollEvent(view=self.views[view_id], direction="down"))
+                possible_events.append(ScrollEvent(view=self.views[view_id], direction="left"))
+                possible_events.append(ScrollEvent(view=self.views[view_id], direction="right"))
+
+        for view_id in enabled_view_ids:
+            if self.__safe_dict_get(self.views[view_id], 'checkable'):
+                possible_events.append(TouchEvent(view=self.views[view_id]))
+                touch_exclude_view_ids.add(view_id)
+                touch_exclude_view_ids.union(self.get_all_children(self.views[view_id]))
+
+        for view_id in enabled_view_ids:
+            if self.__safe_dict_get(self.views[view_id], 'long_clickable') and not self.__safe_dict_get(self.views[view_id], 'class') == 'android.widget.EditText':
+                possible_events.append(LongTouchEvent(view=self.views[view_id]))
+
+        for view_id in enabled_view_ids:
+            if self.__safe_dict_get(self.views[view_id], 'editable'):
+                possible_events.append(SetTextEvent(view=self.views[view_id], text="Hello World"))
+                touch_exclude_view_ids.add(view_id)
+                # TODO figure out what event can be sent to editable views
+                pass
+
+        for view_id in enabled_view_ids:
+            if view_id in touch_exclude_view_ids:
+                continue
+            children = self.__safe_dict_get(self.views[view_id], 'children')
+            if children and len(children) > 0:
+                continue
+            if self.__safe_dict_get(
+                self.views[view_id], 'clickable'
+            ) or self.__safe_dict_get(self.views[view_id], 'checkable'):
+                possible_events.append(TouchEvent(view=self.views[view_id]))
+
+        # For old Android navigation bars
+        # possible_events.append(KeyEvent(name="MENU"))
+
+        self.possible_events = possible_events
+        return [] + possible_events
+
+    def get_possible_input_only_leaf_nodes(self):
+        """
+        Get a list of possible input events for this state
+        :return: list of InputEvent
+        """
+        if self.possible_events:
+            return [] + self.possible_events
+        possible_events = []
+        enabled_view_ids = []
+        touch_exclude_view_ids = set()
+        for view_dict in self.views:
+            # exclude navigation bar if exists
+            if self.__safe_dict_get(view_dict, 'enabled') and \
+                    self.__safe_dict_get(view_dict, 'visible') and \
+                    self.__safe_dict_get(view_dict, 'resource_id') not in \
+               ['android:id/navigationBarBackground',
+                'android:id/statusBarBackground']:
+                children = self.__safe_dict_get(view_dict, 'children')
+                if children and len(children) > 0:
+                    continue
                 enabled_view_ids.append(view_dict['temp_id'])
         # enabled_view_ids.reverse()
 

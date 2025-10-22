@@ -442,7 +442,9 @@ class RandomExplorationPolicy(UtgBasedInputPolicy):
 
 
         # Get all possible input events
-        possible_events = current_state.get_possible_input()
+        possible_events = current_state.get_possible_input_only_leaf_nodes()
+        if len(possible_events) == 0:
+            possible_events = current_state.get_possible_input()
         target_event = self._weighted_random_choice(possible_events)
         
         if target_event is None:
