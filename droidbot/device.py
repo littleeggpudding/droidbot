@@ -957,8 +957,32 @@ class Device(object):
             self.skip_diary_welcome()
         elif "com.quran.labs.androidquran" in app_package:
             self.skip_quran_welcome()
+        elif app_package == "com.red.alert":
+            self.skip_redalert_welcome()
         else:
             return
+
+    def skip_redalert_welcome(self):
+        """
+        Skip the RedAlert welcome/onboarding screens
+        1. click "Get Started"
+        """
+        try:
+            # Step 1: click Allow
+            skip_button = self.u2(text="Not Now")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(2)
+
+            skip_button = self.u2(text="OK")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(1)
+
+            return True
+        except Exception as e:
+            print(f"Error during RedAlert welcome screen skip: {e}")
+            return False
 
     def skip_quran_welcome(self):
         """
