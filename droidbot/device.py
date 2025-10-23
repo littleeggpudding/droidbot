@@ -959,8 +959,81 @@ class Device(object):
             self.skip_quran_welcome()
         elif app_package == "com.red.alert":
             self.skip_redalert_welcome()
+        elif app_package == "io.github.muntashirakon.AppManager":
+            self.skip_appmanager_welcome()
+        elif app_package == "com.mxt.anitrend":
+            self.skip_anitrend_welcome()
+        elif app_package == "com.michaldrabik.showly2":
+            self.skip_showly2_welcome()
         else:
             return
+
+    def skip_showly2_welcome(self):
+        """
+        Skip the Showly2 welcome/onboarding screens
+        1. click "Get Started"
+        """
+        try:
+            # Step 1: click Allow
+            skip_button = self.u2(text="OK, I UNDERSTAND")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(1)
+
+            return True
+        except Exception as e:
+            print(f"Error during Showly2 welcome screen skip: {e}")
+            return False
+
+            
+    
+    def skip_anitrend_welcome(self):
+        """
+        Skip the AniTrend welcome/onboarding screens
+        1. click "Get Started"
+        """
+        try:
+            # Step 1: click next
+
+            for i in range(4):
+                next_button = self.u2(resourceId="com.mxt.anitrend:id/ivNext")
+                if next_button.exists():
+                    next_button.click()
+                    time.sleep(0.5)
+
+
+            skip_button = self.u2(text="Get Started")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(1)
+
+            # 系统返回Back
+            self.u2.press("BACK")
+            time.sleep(0.5)
+
+            self.u2.press("BACK")
+            time.sleep(0.5)
+
+            return True
+        except Exception as e:
+            print(f"Error during AniTrend welcome screen skip: {e}")
+            return False
+    def skip_appmanager_welcome(self):
+        """
+        Skip the AppManager welcome/onboarding screens
+        1. click "Get Started"
+        """
+        try:
+            # Step 1: click Allow
+            skip_button = self.u2(text="I AGREE")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(1)
+
+            return True
+        except Exception as e:
+            print(f"Error during AppManager welcome screen skip: {e}")
+            return False
 
     def skip_redalert_welcome(self):
         """

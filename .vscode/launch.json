@@ -294,6 +294,21 @@
         "-count", "100",
         "-d", "emulator-5554"
         ]
-    }
+    },
+    {
+        "name": "showly2_record",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "args": ["-a", "droidbot/select_apks/com.michaldrabik.showly2/v3.55.1.apk",
+        "-o", "record_test_output",
+        "-is_emulator",
+        "-policy", "random_exploration",
+        "-count", "30",
+        "-d", "emulator-5556"
+        ]
+    },
+
     ]
 }

@@ -5,6 +5,7 @@
 # 但是不忽略 .py 和 .sh 文件
 !*.py
 !*.sh
+!*.md
 
 # 不忽略 .gitignore 本身
 !.gitignore
@@ -30,7 +31,6 @@
 *.docx
 *.lock
 *.cfg
-*.md
 *.LICENSE
 *.egg-info/
 __pycache__/
