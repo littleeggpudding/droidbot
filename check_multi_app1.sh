@@ -17,4 +17,7 @@ for csv in "$CSV_DIR"/*.csv; do
 
     # Record
     ./check_output.sh -t record -p "$pkg"
+
+    # Delete useless record
+    ./check_useless_record.sh "$pkg" --delete
 done
