@@ -88,7 +88,13 @@ class DroidBotRunner:
         with open(csv_file, 'r', encoding='utf-8') as f:
             reader = csv.reader(f)
             rows = list(reader)
-        for row in rows[2:]:
+        
+        if self.mode == 'replay_new':
+            start_row = 1
+        else:
+            start_row = 2
+        
+        for row in rows[start_row:]:
             if len(row) > 6 and row[6].strip():
                 apks.append(row[6].strip())
         logger.info(f"Loaded {len(apks)} APKs from {csv_file}")
