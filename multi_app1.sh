@@ -2,11 +2,21 @@
 
 CSV_DIR="droidbot/select_apks"
 
+# for server173
+skiped_apps=("com.mkulesh.micromath.plus" "io.github.muntashirakon.AppManager" "com.byagowi.persiancalendar")
+
 for csv in "$CSV_DIR"/*.csv; do
+    
+
     pkg=$(basename "$csv" .csv)  # 提取包名
     echo "============================"
     echo " Processing $pkg"
     echo "============================"
+
+    if [[ " ${skiped_apps[@]} " =~ " $pkg " ]]; then
+        echo "Skipping $pkg because it is in the skiped_apps list"
+        continue
+    fi
 
     # Record
     python start_bash.py record \

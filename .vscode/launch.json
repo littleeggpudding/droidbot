@@ -296,16 +296,16 @@
         ]
     },
     {
-        "name": "showly2_record",
+        "name": "musicplayer_record",
         "type": "debugpy",
         "request": "launch",
         "console": "integratedTerminal",
         "program": "${workspaceFolder}/start.py",
-        "args": ["-a", "droidbot/select_apks/com.michaldrabik.showly2/v3.55.1.apk",
+        "args": ["-a", "droidbot/select_apks/com.github.anrimian.musicplayer/v0.9.7.1.apk",
         "-o", "record_test_output",
         "-is_emulator",
         "-policy", "random_exploration",
-        "-count", "30",
+        "-count", "10",
         "-d", "emulator-5556"
         ]
     },

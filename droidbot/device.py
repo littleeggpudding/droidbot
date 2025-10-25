@@ -934,6 +934,17 @@ class Device(object):
         self.pause_sending_event = False
 
 
+    def install_files(self, app_package=None):
+        """
+        Install the files to the device for the app
+        """
+        if "com.atul.musicplayer" in app_package or "com.github.anrimian.musicplayer" in app_package:
+            self.push_file("droidbot/Document/Heartbeat.mp3", "/sdcard/Music/")
+            self.push_file("droidbot/Document/intermission.mp3", "/sdcard/Music/")
+            self.adb.shell("am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Music/Heartbeat.mp3")
+            self.adb.shell("am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Music/intermission.mp3")
+
+    
     def skip_welcome(self, app_package=None):
         """
         尝试跳过应用的欢迎页面
@@ -965,8 +976,63 @@ class Device(object):
             self.skip_anitrend_welcome()
         elif app_package == "com.michaldrabik.showly2":
             self.skip_showly2_welcome()
+        elif "com.atul.musicplayer" in app_package:
+            self.skip_musicplayer_welcome()
+        elif app_package == "org.zephyrsoft.trackworktime":
+            self.skip_trackworktime_welcome()
         else:
             return
+
+    def skip_trackworktime_welcome(self):
+        """
+        Skip the TrackWorkTime welcome/onboarding screens
+        1. click "Get Started"
+        """
+        try:
+            # Step 1: click Allow
+            skip_button = self.u2(text="OK")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(0.5)
+
+            # Step 2: click Allow
+            skip_button = self.u2(text='ALLOW ACCESS TO “DOWNLOADS”')
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(0.5)
+
+            # Step 3: click Allow
+            skip_button = self.u2(text="ALLOW")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(0.5)
+
+            skip_button = self.u2(text="NO")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(0.5)
+
+            return True
+        except Exception as e:
+            print(f"Error during TrackWorkTime welcome screen skip: {e}")
+            return False
+
+    def skip_musicplayer_welcome(self):
+        """
+        Skip the MusicPlayer welcome/onboarding screens
+        1. click "Get Started"
+        """
+        try:
+            # Step 1: click Allow
+            skip_button = self.u2(text="Allow")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(1)
+
+            return True
+        except Exception as e:
+            print(f"Error during MusicPlayer welcome screen skip: {e}")
+            return False
 
     def skip_showly2_welcome(self):
         """

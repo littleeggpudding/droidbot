@@ -479,7 +479,7 @@ class DeviceState(object):
         self.possible_events = possible_events
         return [] + possible_events
 
-    def get_possible_input_only_leaf_nodes(self):
+    def get_possible_input_only_leaf_nodes(self, package_name=None):
         """
         Get a list of possible input events for this state
         :return: list of InputEvent
@@ -542,6 +542,12 @@ class DeviceState(object):
                 self.views[view_id], 'clickable'
             ) or self.__safe_dict_get(self.views[view_id], 'checkable'):
                 possible_events.append(TouchEvent(view=self.views[view_id]))
+
+            if package_name and "com.atul.musicplayer" in package_name:
+                    focus_list = ["android.widget.RadioButton", "android.widget.ImageView", "android.widget.View", "android.widget.CheckBox", "android.widget.Button", "android.widget.Switch",
+                                  "android.widget.ImageButton", "android.widget.TextView", "android.widget.CheckedTextView", "android.widget.TableRow", "android.widget.EditText", "android.support.v7.widget.ar"]
+                    if self.views[view_id]['class'] in focus_list:
+                        possible_events.append(TouchEvent(view=self.views[view_id]))
 
         # For old Android navigation bars
         # possible_events.append(KeyEvent(name="MENU"))

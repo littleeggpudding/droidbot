@@ -75,7 +75,7 @@ class InputPolicy(object):
                 #     event = IntentEvent(self.app.get_start_intent())
                 if self.action_count == 0 and self.master is None:
                     event = KillAppEvent(app=self.app)
-                    
+                    self.device.install_files(self.app.get_package_name())
                 else:
                     # 在应用启动后立即尝试跳过欢迎界面
                     if self.action_count == 2:
@@ -442,7 +442,7 @@ class RandomExplorationPolicy(UtgBasedInputPolicy):
 
 
         # Get all possible input events
-        possible_events = current_state.get_possible_input_only_leaf_nodes()
+        possible_events = current_state.get_possible_input_only_leaf_nodes(self.app.get_package_name())
         if len(possible_events) == 0:
             possible_events = current_state.get_possible_input()
         target_event = self._weighted_random_choice(possible_events)
