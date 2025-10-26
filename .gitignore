@@ -6,6 +6,8 @@
 !*.py
 !*.sh
 !*.md
+!*.mp3
+
 
 # 不忽略 .gitignore 本身
 !.gitignore

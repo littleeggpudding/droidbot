@@ -543,7 +543,7 @@ class DeviceState(object):
             ) or self.__safe_dict_get(self.views[view_id], 'checkable'):
                 possible_events.append(TouchEvent(view=self.views[view_id]))
 
-            if package_name and "com.atul.musicplayer" in package_name:
+            if package_name and ("com.atul.musicplayer" in package_name or "com.activitymanager" in package_name):
                     focus_list = ["android.widget.RadioButton", "android.widget.ImageView", "android.widget.View", "android.widget.CheckBox", "android.widget.Button", "android.widget.Switch",
                                   "android.widget.ImageButton", "android.widget.TextView", "android.widget.CheckedTextView", "android.widget.TableRow", "android.widget.EditText", "android.support.v7.widget.ar"]
                     if self.views[view_id]['class'] in focus_list:

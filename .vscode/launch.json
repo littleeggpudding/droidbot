@@ -296,16 +296,16 @@
         ]
     },
     {
-        "name": "musicplayer_record",
+        "name": "currency_record",
         "type": "debugpy",
         "request": "launch",
         "console": "integratedTerminal",
         "program": "${workspaceFolder}/start.py",
-        "args": ["-a", "droidbot/select_apks/com.github.anrimian.musicplayer/v0.9.7.1.apk",
+        "args": ["-a", "droidbot/select_apks/de.salomax.currencies/1.23.0.apk",
         "-o", "record_test_output",
         "-is_emulator",
         "-policy", "random_exploration",
-        "-count", "10",
+        "-count", "30",
         "-d", "emulator-5556"
         ]
     },

@@ -944,6 +944,33 @@ class Device(object):
             self.adb.shell("am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Music/Heartbeat.mp3")
             self.adb.shell("am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Music/intermission.mp3")
 
+        elif "com.android.documentsui" in app_package or "exe.bbllw8.anemo" in app_package:
+            # 1. mp3
+            self.push_file("droidbot/Document/Heartbeat.mp3", "/sdcard/Music/")
+            self.push_file("droidbot/Document/intermission.mp3", "/sdcard/Music/")
+
+            # 2. image
+            self.push_file("droidbot/Document/Android_logo.jpg", "/sdcard/Pictures/")
+            self.push_file("droidbot/Document/Android_robot.png", "/sdcard/Pictures/")
+
+            # 3. video
+            self.push_file("droidbot/Document/sample_iPod.m4v", "/sdcard/Movies/")
+            self.push_file("droidbot/Document/sample_mpeg4.mp4", "/sdcard/Movies/")
+
+            self.adb.shell("am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Music/Heartbeat.mp3")
+            self.adb.shell("am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Music/intermission.mp3")
+            self.adb.shell("am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Pictures/Android_logo.jpg")
+            self.adb.shell("am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Pictures/Android_robot.png")
+            self.adb.shell("am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Movies/sample_iPod.m4v")
+            self.adb.shell("am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Movies/sample_mpeg4.mp4")
+
+
+
+
+
+
+
+
     
     def skip_welcome(self, app_package=None):
         """
@@ -980,8 +1007,27 @@ class Device(object):
             self.skip_musicplayer_welcome()
         elif app_package == "org.zephyrsoft.trackworktime":
             self.skip_trackworktime_welcome()
+        elif app_package == "com.android.documentsui" or app_package == "exe.bbllw8.anemo":
+            self.skip_documentsui_welcome()
         else:
             return
+
+    def skip_documentsui_welcome(self):
+        """
+        Skip the DocumentsUI welcome/onboarding screens
+        1. click "OK"
+        """
+        try:
+            # Step 1: click Allow
+            skip_button = self.u2(text="OK")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(0.5)
+
+            return True
+        except Exception as e:
+            print(f"Error during DocumentsUI welcome screen skip: {e}")
+            return False
 
     def skip_trackworktime_welcome(self):
         """
