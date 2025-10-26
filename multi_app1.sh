@@ -3,7 +3,7 @@
 CSV_DIR="droidbot/select_apks"
 
 # for server173
-skiped_apps=("com.mkulesh.micromath.plus" "io.github.muntashirakon.AppManager" "com.byagowi.persiancalendar")
+skiped_apps=("com.mkulesh.micromath.plus" "io.github.muntashirakon.AppManager" "com.byagowi.persiancalendar" "com.red.alert" "com.amaze.filemanager" "org.secuso.privacyfriendlytodolist" "org.billthefarmer.diary")
 
 for csv in "$CSV_DIR"/*.csv; do
     
