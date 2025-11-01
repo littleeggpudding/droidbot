@@ -494,9 +494,9 @@ class RandomExplorationPolicy(UtgBasedInputPolicy):
             'touch': 50,          # 最高权重
             'long_touch': 15,     # 中等权重
             'swipe': 15,          # 中等权重
-            'set_text': 15,       # 中等权重
+            'set_text': 40,       # 中等权重
             'select': 15,         # 中等权重
-            'scroll': 5,          # 最低权重
+            'scroll': 40,          # 最低权重
             'key': 15,            # 中等权重
             'intent': 2,         # 较低权重
         }

@@ -3,7 +3,36 @@
 CSV_DIR="droidbot/select_apks"
 
 # for server173
-skiped_apps=("com.mkulesh.micromath.plus" "io.github.muntashirakon.AppManager" "com.byagowi.persiancalendar" "com.red.alert" "com.amaze.filemanager" "org.secuso.privacyfriendlytodolist" "org.billthefarmer.diary")
+skiped_apps=(
+    "com.mkulesh.micromath.plus"
+    "io.github.muntashirakon.AppManager"
+    "com.byagowi.persiancalendar"
+    "com.red.alert"
+    "com.amaze.filemanager"
+    "org.secuso.privacyfriendlytodolist"
+    "org.billthefarmer.diary"
+    "com.vrem.wifianalyzer"
+    "org.zephyrsoft.trackworktime"
+    "com.atul.musicplayer"
+    "com.michaldrabik.showly2"
+    "com.mxt.anitrend"
+    "com.best.deskclock"
+    "it.feio.android.omninotes"
+    "net.gsantner.markor"
+    "xyz.zedler.patrick.tack"
+    "com.ichi2.anki"
+    "com.mirfatif.permissionmanagerx"
+    "org.isoron.uhabits"
+    "org.billthefarmer.editor"
+    "com.jlindemann.science"
+    "org.secuso.privacyfriendlynotes"
+    "eu.faircode.email"
+    "app.familygem"
+    "com.quran.labs.androidquran"
+    "de.markusfisch.android.libra"
+    
+
+)
 
 for csv in "$CSV_DIR"/*.csv; do
     
@@ -19,7 +48,7 @@ for csv in "$CSV_DIR"/*.csv; do
     fi
 
     # Record
-    python start_bash.py record \
+    python3 start_bash.py record \
         --csv-file "$csv" \
         --apk-base "$CSV_DIR/$pkg" \
         --max-parallel 8 \
@@ -27,7 +56,7 @@ for csv in "$CSV_DIR"/*.csv; do
         --parent-dir "$pkg"
 
     # Replay original
-    python start_bash.py replay_original \
+    python3 start_bash.py replay_original \
         --csv-file "$csv" \
         --apk-base "$CSV_DIR/$pkg" \
         --max-parallel 8 \

@@ -833,7 +833,7 @@ class SetTextEvent(UIEvent):
     def send(self, device):
         if self.u2 is not None:
             self._set_text_by_u2()
-            time.sleep(0.5)
+            time.sleep(1)
         else:
             x, y = UIEvent.get_xy(x=self.x, y=self.y, view=self.view)
             touch_event = TouchEvent(x=x, y=y)

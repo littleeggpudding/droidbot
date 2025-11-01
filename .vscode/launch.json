@@ -296,13 +296,13 @@
         ]
     },
     {
-        "name": "currency_record",
+        "name": "SkyTube_replay",
         "type": "debugpy",
         "request": "launch",
         "console": "integratedTerminal",
         "program": "${workspaceFolder}/start.py",
-        "args": ["-a", "droidbot/select_apks/de.salomax.currencies/1.23.0.apk",
-        "-o", "record_test_output",
+        "args": ["-a", "droidbot/apks/test1.apk",
+        "-o", "record_test",
         "-is_emulator",
         "-policy", "random_exploration",
         "-count", "30",

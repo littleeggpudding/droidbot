@@ -1,6 +1,8 @@
 import copy
 import math
 import os
+import random
+import string
 
 from .utils import md5
 from .input_event import TouchEvent, LongTouchEvent, ScrollEvent, SetTextEvent, KeyEvent
@@ -543,11 +545,47 @@ class DeviceState(object):
             ) or self.__safe_dict_get(self.views[view_id], 'checkable'):
                 possible_events.append(TouchEvent(view=self.views[view_id]))
 
-            if package_name and ("com.atul.musicplayer" in package_name or "com.activitymanager" in package_name):
+            if package_name and ("com.atul.musicplayer" in package_name or "com.activitymanager" in package_name or "net.bible.android.activity" in package_name or "ua.syt0r.kanji" in package_name):
                     focus_list = ["android.widget.RadioButton", "android.widget.ImageView", "android.widget.View", "android.widget.CheckBox", "android.widget.Button", "android.widget.Switch",
                                   "android.widget.ImageButton", "android.widget.TextView", "android.widget.CheckedTextView", "android.widget.TableRow", "android.widget.EditText", "android.support.v7.widget.ar"]
                     if self.views[view_id]['class'] in focus_list:
                         possible_events.append(TouchEvent(view=self.views[view_id]))
+
+            if package_name and "org.isoron.uhabits" in package_name:
+                focus_list = ["android.widget.FrameLayout"]
+                if self.views[view_id]['class'] in focus_list:
+                    possible_events.append(SetTextEvent(view=self.views[view_id], text="Hello World"))
+
+            if package_name and ("com.inspiredandroid.linuxcommandbibliotheca" in package_name):
+                focus_list = ["android.view.View"]
+                if self.views[view_id]['class'] in focus_list:
+                    possible_events.append(TouchEvent(view=self.views[view_id]))
+
+
+            if package_name and ("code.name.monkey.retromusic" in package_name or "org.schabi.newpipe" in package_name):
+                focus_list = ["android.widget.ImageView"]
+                if self.views[view_id]['class'] in focus_list:
+                    possible_events.append(TouchEvent(view=self.views[view_id]))
+
+            if package_name and ("com.parseus.codecinfo" in package_name or "de.grobox.liberario" in package_name):
+                focus_list = ["android.widget.TextView"]
+                if self.views[view_id]['class'] in focus_list:
+                    possible_events.append(TouchEvent(view=self.views[view_id]))
+
+            if package_name and ("com.cookiegames.smartcookie" in package_name):
+                focus_list = ["android.view.View", "android.widget.TextView"]
+                if self.views[view_id]['class'] in focus_list:
+                    possible_events.append(TouchEvent(view=self.views[view_id]))
+
+            
+            if package_name and "com.onlyoffice.documents" in package_name:
+                focus_list = ["android.widget.ImageView", "android.widget.TextView"]
+                if self.views[view_id]['class'] in focus_list:
+                    possible_events.append(TouchEvent(view=self.views[view_id]))
+
+
+
+                
 
         # For old Android navigation bars
         # possible_events.append(KeyEvent(name="MENU"))

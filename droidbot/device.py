@@ -938,13 +938,19 @@ class Device(object):
         """
         Install the files to the device for the app
         """
-        if "com.atul.musicplayer" in app_package or "com.github.anrimian.musicplayer" in app_package:
+        if "com.atul.musicplayer" in app_package or "com.github.anrimian.musicplayer" in app_package or "remix.myplayer" in app_package or "org.gateshipone.odyssey" in app_package or "com.github.pakka_papad" in app_package or "code.name.monkey.retromusic" in app_package or "org.oxycblt.auxio" in app_package:
             self.push_file("droidbot/Document/Heartbeat.mp3", "/sdcard/Music/")
             self.push_file("droidbot/Document/intermission.mp3", "/sdcard/Music/")
+            self.push_file("droidbot/Document/ThingsWeCantIgnore.mp3", "/sdcard/Music/")
+            self.push_file("droidbot/Document/hip-hop.mp3", "/sdcard/Music/")
+            self.push_file("droidbot/Document/puff-pass.mp3", "/sdcard/Music/")
             self.adb.shell("am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Music/Heartbeat.mp3")
             self.adb.shell("am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Music/intermission.mp3")
+            self.adb.shell("am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Music/ThingsWeCantIgnore.mp3")
+            self.adb.shell("am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Music/hip-hop.mp3")
+            self.adb.shell("am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Music/puff-pass.mp3")
 
-        elif "com.android.documentsui" in app_package or "exe.bbllw8.anemo" in app_package:
+        elif "com.android.documentsui" in app_package or "exe.bbllw8.anemo" in app_package or "is.xyz.mpv" in app_package:
             # 1. mp3
             self.push_file("droidbot/Document/Heartbeat.mp3", "/sdcard/Music/")
             self.push_file("droidbot/Document/intermission.mp3", "/sdcard/Music/")
@@ -957,12 +963,20 @@ class Device(object):
             self.push_file("droidbot/Document/sample_iPod.m4v", "/sdcard/Movies/")
             self.push_file("droidbot/Document/sample_mpeg4.mp4", "/sdcard/Movies/")
 
+            # 4. file
+            self.push_file("droidbot/Document/test.pdf", "/sdcard/Documents/")
+            self.push_file("droidbot/Document/test.pdf", "/sdcard/Download/")
+            self.push_file("droidbot/Document/hip-hop.mp3", "/sdcard/Download/")
+
             self.adb.shell("am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Music/Heartbeat.mp3")
             self.adb.shell("am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Music/intermission.mp3")
             self.adb.shell("am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Pictures/Android_logo.jpg")
             self.adb.shell("am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Pictures/Android_robot.png")
             self.adb.shell("am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Movies/sample_iPod.m4v")
             self.adb.shell("am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Movies/sample_mpeg4.mp4")
+            self.adb.shell("am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Documents/test.pdf")
+            self.adb.shell("am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Download/test.pdf")
+            self.adb.shell("am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Download/hip-hop.mp3")
 
 
 
@@ -1009,8 +1023,440 @@ class Device(object):
             self.skip_trackworktime_welcome()
         elif app_package == "com.android.documentsui" or app_package == "exe.bbllw8.anemo":
             self.skip_documentsui_welcome()
+        elif app_package == "de.westnordost.streetcomplete":
+            self.skip_streetcomplete_welcome()
+        elif app_package == "org.isoron.uhabits":
+            self.skip_uhabits_welcome()
+        elif app_package == "com.mirfatif.permissionmanagerx":
+            self.skip_permissionmanagerx_welcome()
+        elif app_package == "org.secuso.privacyfriendlynotes":
+            self.skip_privacyfriendlynotes_welcome()
+        elif app_package == "eu.faircode.email":
+            self.skip_email_welcome()
+        elif app_package == "com.farmerbb.notepad":
+            self.skip_notepad_welcome()
+        elif app_package == "com.inspiredandroid.linuxcommandbibliotheca":
+            self.skip_linuxcommandbibliotheca_welcome()
+        elif app_package == "remix.myplayer" or app_package == "me.zhanghai.android.files":
+            self.skip_myplayer_welcome()
+        elif app_package == "org.gateshipone.odyssey":
+            self.skip_odyssey_welcome()
+        elif app_package == "net.bible.android.activity":
+            self.skip_bible_welcome()
+        elif app_package == "com.github.pakka_papad":
+            self.skip_pakka_welcome()
+        elif app_package == "com.cookiegames.smartcookie":
+            self.skip_smartcookie_welcome()
+        elif app_package == "code.name.monkey.retromusic":
+            self.skip_retromusic_welcome()
+        elif app_package == "org.koitharu.kotatsu":
+            self.skip_kotatsu_welcome()
+        elif "ua.syt0r.kanji" in app_package:
+            self.skip_kanji_welcome()
+        elif app_package == "org.schabi.newpipe":
+            self.skip_newpipe_welcome()
+        elif app_package == "com.onlyoffice.documents":
+            self.skip_documents_welcome()
         else:
             return
+
+    def skip_documents_welcome(self):
+
+        """
+        Skip the Documents welcome/onboarding screens
+        1. click "Get Started"
+        """
+        try:
+            # Step 1: click Allow
+            for i in range(6):
+                skip_button = self.u2(text="Next")
+                if skip_button.exists():
+                    skip_button.click()
+                    time.sleep(0.5)
+
+                skip_button = self.u2(text="Get started")
+                if skip_button.exists():
+                    skip_button.click()
+                    time.sleep(0.5)
+                    
+                skip_button = self.u2(text="Allow")
+                if skip_button.exists():
+                    skip_button.click()
+                    time.sleep(0.5)
+
+
+                i += 1
+
+
+            return True
+        except Exception as e:
+            print(f"Error during Documents welcome screen skip: {e}")
+            return False
+
+    def skip_newpipe_welcome(self):
+        """
+        Skip the NewPipe welcome/onboarding screens
+        1. click "Get Started"
+        """
+        try:
+            skip_button = self.u2(text="RETRY")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(0.5)
+            return True
+        except Exception as e:
+            print(f"Error during NewPipe welcome screen skip: {e}")
+            return False
+
+    def skip_kanji_welcome(self):
+
+        """
+        Skip the Kanji welcome/onboarding screens
+        1. click "Get Started"
+        """
+        try:
+            skip_button = self.u2(text="Close")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(0.5)
+
+            return True
+        except Exception as e:
+            print(f"Error during Kanji welcome screen skip: {e}")
+            return False
+
+    def skip_kotatsu_welcome(self):
+        """
+        Skip the Kotatsu welcome/onboarding screens
+        1. click "Get Started"
+        """
+        try:
+            # Back
+            self.u2.press("BACK")
+            time.sleep(0.5)
+
+            return True
+        except Exception as e:
+            print(f"Error during Kotatsu welcome screen skip: {e}")
+            return False
+
+    def skip_retromusic_welcome(self):
+
+        """
+        Skip the RetroMusic welcome/onboarding screens
+        1. click "Get Started"
+        """
+        try:
+            # Back
+            self.u2.press("BACK")
+            time.sleep(0.5)
+
+            
+            return True
+        except Exception as e:
+            print(f"Error during RetroMusic welcome screen skip: {e}")
+            return False
+
+    def skip_smartcookie_welcome(self):
+        """
+        Skip the SmartCookie welcome/onboarding screens
+        1. click "Get Started"
+        """
+        try:
+            skip_button = self.u2(description="Get started!")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(0.5)
+            for i in range(5):
+                skip_button = self.u2(description="NEXT")
+                if skip_button.exists():
+                    skip_button.click()
+                    time.sleep(0.5)
+
+                skip_button = self.u2(description="DONE")
+                if skip_button.exists():
+                    skip_button.click()
+                    time.sleep(0.5)
+
+                skip_button = self.u2(text="Allow")
+                if skip_button.exists():
+                    skip_button.click()
+                    time.sleep(0.5)
+
+                i += 1
+
+            return True
+        except Exception as e:
+            print(f"Error during SmartCookie welcome screen skip: {e}")
+            return False
+
+    def skip_pakka_welcome(self):
+        """
+        Skip the Pakka welcome/onboarding screens
+        1. click "Get Started"
+        """
+        try:
+            skip_button = self.u2(text="Grant access to read storage")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(0.5)
+
+            skip_button = self.u2(text="Allow")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(0.5)
+
+            skip_button = self.u2(text="Nexts")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(0.5)
+
+            skip_button = self.u2(text="Scan storage")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(0.5)
+
+            skip_button = self.u2(text="Finish")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(0.5)
+
+            return True
+        except Exception as e:
+            print(f"Error during Pakka welcome screen skip: {e}")
+            return False
+
+
+            
+    def skip_bible_welcome(self):
+        """
+        Skip the Odyssey welcome/onboarding screens
+        1. click "Get Started"
+        """
+        try:
+            # Step 1: click Allow
+            skip_button = self.u2(text="DOWNLOAD DOCUMENTS")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(0.5)
+            
+            skip_button = self.u2(text="YES, DO NOT ASK AGAIN")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(0.5)
+
+            time.sleep(10)
+            
+            return True
+        except Exception as e:
+            print(f"Error during Odyssey welcome screen skip: {e}")
+            return False
+    
+    
+    def skip_odyssey_welcome(self):
+        """
+        Skip the Odyssey welcome/onboarding screens
+        1. click "Get Started"
+        """
+        try:
+            # Step 1: click Allow
+            skip_button = self.u2(text="Allow")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(0.5)
+            
+            skip_button = self.u2(text="Cancel")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(0.5)
+            
+            return True
+        except Exception as e:
+            print(f"Error during Odyssey welcome screen skip: {e}")
+            return False
+
+    def skip_myplayer_welcome(self):
+        """
+        Skip the Calendar welcome/onboarding screens
+        1. click "Get Started"
+        """
+        try:
+            # Step 1: click Allow
+            skip_button = self.u2(text="Allow")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(0.5)
+            return True
+        except Exception as e:
+            print(f"Error during Calendar welcome screen skip: {e}")
+            return False
+
+
+    def skip_linuxcommandbibliotheca_welcome(self):
+        """
+        Skip the LinuxCommandBibliotheca welcome/onboarding screens
+        1. click "Get Started"
+        """
+        try:
+            # Step 1: click Allow
+            skip_button = self.u2(text="OK")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(0.5)
+            return True
+        except Exception as e:
+            print(f"Error during LinuxCommandBibliotheca welcome screen skip: {e}")
+            return False
+
+    def skip_notepad_welcome(self):
+        """
+        Skip the Notepad welcome/onboarding screens
+        1. click "Get Started"
+        """
+        try:
+            # Step 1: click Allow
+            skip_button = self.u2(text="CLOSE")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(0.5)
+
+            return True
+        except Exception as e:
+            print(f"Error during Notepad welcome screen skip: {e}")
+            return False
+
+    def skip_email_welcome(self):
+        """
+        Skip the Email welcome/onboarding screens
+        1. click "Get Started"
+        """
+        try:
+            # Step 1: click Allow
+            skip_button = self.u2(text="I agree")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(0.5)
+            return True
+        except Exception as e:
+            print(f"Error during Email welcome screen skip: {e}")
+            return False
+
+    def skip_privacyfriendlynotes_welcome(self):
+        """
+        Skip the PrivacyFriendlyNotes welcome/onboarding screens
+        1. click "Get Started"
+        """
+        try:
+            # Step 1: click Allow
+            skip_button = self.u2(text="OKAY")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(0.5)
+
+            skip_button = self.u2(text="Skip")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(0.5)
+
+            skip_button = self.u2(text="SKIP")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(0.5)
+
+            
+
+            return True
+        except Exception as e:
+            print(f"Error during PrivacyFriendlyNotes welcome screen skip: {e}")
+            return False
+
+    def skip_permissionmanagerx_welcome(self):
+        """
+        Skip the PermissionManagerX welcome/onboarding screens
+        1. click "Get Started"
+        """
+        try:
+            # Step 1: click Allow
+            skip_button = self.u2(text="OK")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(0.5)
+
+            return True
+        except Exception as e:  
+            print(f"Error during PermissionManagerX welcome screen skip: {e}")
+            return False
+
+    def skip_uhabits_welcome(self):
+        """
+        Skip the UHabits welcome/onboarding screens
+        1. click "Get Started"
+        """
+        try:
+            # Step 1: click Allow
+            for i in range(5):
+                skip_button = self.u2(description="NEXT")
+                if skip_button.exists():
+                    skip_button.click()
+                    time.sleep(0.5)
+
+                skip_button = self.u2(description="DONE")
+                if skip_button.exists():
+                    skip_button.click()
+                    time.sleep(0.5)
+                    break
+
+                i += 1
+
+            return True
+        except Exception as e:
+            print(f"Error during UHabits welcome screen skip: {e}")
+            return False
+
+    def skip_streetcomplete_welcome(self):
+        """
+        Skip the StreetComplete welcome/onboarding screens
+        1. click "Get Started"
+        """
+        try:
+            # Step 1: click Next
+
+
+            for i in range(8):
+                skip_button = self.u2(text="Next")
+                if skip_button.exists():
+                    skip_button.click()
+                    time.sleep(0.5)
+
+                skip_button = self.u2(text="NEXT")
+                if skip_button.exists():
+                    skip_button.click()
+                    time.sleep(0.5)
+
+                skip_button = self.u2(text="Allow only while using the app")
+                if skip_button.exists():
+                    skip_button.click()
+                    time.sleep(0.5)
+
+                skip_button = self.u2(text="Let’s go!")
+                if skip_button.exists():
+                    skip_button.click()
+                    time.sleep(0.5)
+
+
+                skip_button = self.u2(text="LET’S GO!")
+                if skip_button.exists():
+                    skip_button.click()
+                    time.sleep(0.5)
+                
+                i += 1
+
+            time.sleep(10)
+
+            return True
+        except Exception as e:
+            print(f"Error during StreetComplete welcome screen skip: {e}")
+            return False
 
     def skip_documentsui_welcome(self):
         """

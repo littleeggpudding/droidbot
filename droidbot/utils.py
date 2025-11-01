@@ -722,4 +722,4 @@ def escape_html(text):
             .replace("'", '&#x27;'))
 
 if __name__ == "__main__":
-    generate_html_report("test_output", "replay_output", "html_report")
+    generate_html_report("record_output_v6_4_1_run3", "replay_output_v6_6_2_run3_for_v6_4_1", "html_report")
