@@ -301,7 +301,7 @@
         "request": "launch",
         "console": "integratedTerminal",
         "program": "${workspaceFolder}/start.py",
-        "args": ["-a", "droidbot/select_apks/com.onlyoffice.documents/v7.5.1.apk",
+        "args": ["-a", "droidbot/select_apks/is.xyz.mpv/2020-11-16_Build_mpv-android-2020-11-16.apk",
         "-o", "record_test",
         "-is_emulator",
         "-policy", "random_exploration",
