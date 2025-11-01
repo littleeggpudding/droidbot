@@ -1074,7 +1074,17 @@ class Device(object):
                     skip_button.click()
                     time.sleep(0.5)
 
+                skip_button = self.u2(text="NEXT")
+                if skip_button.exists():
+                    skip_button.click()
+                    time.sleep(0.5)
+
                 skip_button = self.u2(text="Get started")
+                if skip_button.exists():
+                    skip_button.click()
+                    time.sleep(0.5)
+
+                skip_button = self.u2(text="DONE")
                 if skip_button.exists():
                     skip_button.click()
                     time.sleep(0.5)
