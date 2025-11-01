@@ -28,6 +28,14 @@ skiped_apps=(
     "com.jlindemann.science"
     "org.secuso.privacyfriendlynotes"
     "eu.faircode.email"
+    "app.familygem"
+    "com.quran.labs.androidquran"
+    "de.markusfisch.android.libra"
+    "com.github.anrimian.musicplayer"
+    "com.activitymanager"
+    "hu.vmiklos.plees_tracker"
+    "de.salomax.currencies"
+    "com.red.alert"
 )
 
 for csv in "$CSV_DIR"/*.csv; do
