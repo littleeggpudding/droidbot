@@ -506,7 +506,7 @@ def parse_args():
     parser.add_argument('--count', type=int, default=100)
     parser.add_argument('--max-parallel', type=int, default=8)
     parser.add_argument('--run-count', type=int, default=20)
-    parser.add_argument('--per-task-timeout', type=int, default=1200)
+    parser.add_argument('--per-task-timeout', type=int, default=1800)
     parser.add_argument('--log-dir', default=None)
     parser.add_argument('--test-mode', action='store_true')
     parser.add_argument('--headless', action='store_true')

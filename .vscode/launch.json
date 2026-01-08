@@ -10,6 +10,7 @@
             "request": "launch",
             "console": "integratedTerminal",
             "program": "${workspaceFolder}/start.py",
+        "envFile": "${workspaceFolder}/.env",
             "args": ["-a", "droidbot/apks/Family_Gem_0.7.15.apk",
             "-replay_output", "test_output", 
             "-is_emulator",
@@ -20,295 +21,730 @@
     },
 
     {
-        "name": "family_gem_replay_new",
+        "name": "test_1",
         "type": "debugpy",
         "request": "launch",
         "console": "integratedTerminal",
         "program": "${workspaceFolder}/start.py",
-        "args": ["-a", "droidbot/apks/Family_Gem_0.8.apk",
-        "-replay_output", "test_output", 
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/com.mkulesh.micromath.plus/Release_v2.22.0.apk",
+        "-o", "test_case_1_same_page/test_matching",
+        "-replay_output", "test_case_1_same_page/record_output_Release_v2_21_0_run2",
         "-is_emulator",
-        "-policy", "replay",
-        "-count", "10",
-        "-o","replay_output_new"
-        ]
-    },
-
-    {
-        "name": "family_gem_record",
-        "type": "debugpy",
-        "request": "launch",
-        "console": "integratedTerminal",
-        "program": "${workspaceFolder}/start.py",
-        "args": ["-a", "droidbot/apks/Family_Gem_0.7.15.apk",
-        "-o", "test_output",
-        "-is_emulator",
-        "-policy", "random_exploration",
-        "-count", "30"
-        ]
-    },
-        
-    {
-            "name": "amaze_file_manager_replay_original",
-            "type": "debugpy",
-            "request": "launch",
-            "console": "integratedTerminal",
-            "program": "${workspaceFolder}/start.py",
-            "args": ["-a", "droidbot/apks/v3.10.apk",
-            "-replay_output", "test_output", 
-            "-is_emulator",
-            "-policy", "replay",
-            "-count", "10",
-            "-o","replay_output_original"
-        ]
-    },
-
-    {
-        "name": "amaze_file_manager_replay_new",
-        "type": "debugpy",
-        "request": "launch",
-        "console": "integratedTerminal",
-        "program": "${workspaceFolder}/start.py",
-        "args": ["-a", "droidbot/apks/v3.5.1.apk",
-        "-replay_output", "test_output", 
-        "-is_emulator",
-        "-policy", "replay",
-        "-count", "10",
-        "-o","replay_output_new"
-        ]
-    },
-
-    {
-        "name": "amaze_file_manager_record",
-        "type": "debugpy",
-        "request": "launch",
-        "console": "integratedTerminal",
-        "program": "${workspaceFolder}/start.py",
-        "args": ["-a", "droidbot/apks/v3.10.apk",
-        "-o", "test_output",
-        "-is_emulator",
-        "-policy", "random_exploration",
-        "-count", "10"
-        ]
-    },
-
-    {
-        "name": "omni_notes_replay_new",
-        "type": "debugpy",
-        "request": "launch",
-        "console": "integratedTerminal",
-        "program": "${workspaceFolder}/start.py",
-        "args": ["-a", "droidbot/select_apks/it.feio.android.omninotes/6.2.4.apk",
-        "-replay_output", "record_output_6_2_2_run1", 
-        "-is_emulator",
-        "-policy", "replay",
+        "-policy", "matching",
         "-count", "100",
-        "-o","replay_output_new"
+        "-failed_replay_output", "test_case_1_same_page/replay_output_Release_v2_22_0_run2_for_Release_v2_21_0",
+        "-d", "emulator-5556"
         ]
     },
 
+    // ========== New Test Cases from README_new.md ==========
+
     {
-        "name": "omni_notes_replay_original",
+        "name": "new_test_1_micromath_scroll",
         "type": "debugpy",
         "request": "launch",
         "console": "integratedTerminal",
         "program": "${workspaceFolder}/start.py",
-        "args": ["-a", "droidbot/select_apks/it.feio.android.omninotes/6.3.1.apk",
-        "-replay_output", "test_output", 
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/com.mkulesh.micromath.plus/Release_v2.23.0.apk",
+        "-o", "test_case_1/test_matching",
+        "-replay_output", "test_case_1/record_output_Release_v2_20_1_run2",
         "-is_emulator",
-        "-policy", "replay",
-        "-count", "30",
-        "-o","replay_output_original"
+        "-policy", "matching",
+        "-count", "100",
+        "-failed_replay_output", "test_case_1/replay_output_Release_v2_23_0_run2_for_Release_v2_20_1",
+        "-d", "emulator-5556"
         ]
     },
 
+    // ========== Failure Analysis Cases (Cases 2-16 from README) ==========
+
     {
-        "name": "omni_notes_record",
+        "name": "case_2_permissionmanagerx_dark_theme",
         "type": "debugpy",
         "request": "launch",
         "console": "integratedTerminal",
         "program": "${workspaceFolder}/start.py",
-        "args": ["-a", "droidbot/select_apks/it.feio.android.omninotes/6.3.1.apk",
-        "-o", "test_output",
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/com.mirfatif.permissionmanagerx/v1.14_PMX_v1.14.apk",
+        "-o", "test_case_2/test_matching",
+        "-replay_output", "test_case_2/record_output_v1_11_run3",
         "-is_emulator",
-        "-policy", "random_exploration",
-        "-count", "10",
+        "-policy", "matching",
+        "-count", "100",
+        "-failed_replay_output", "test_case_2/replay_output_v1_14_PMX_v1_14_run3_for_v1_11",
         "-d", "emulator-5556"
         ]
     },
 
     {
-        "name": "omni_notes_record_4.7.2",
+        "name": "case_3_permissionmanagerx_dark_theme_early",
         "type": "debugpy",
         "request": "launch",
         "console": "integratedTerminal",
         "program": "${workspaceFolder}/start.py",
-        "args": ["-a", "droidbot/select_apks/it.feio.android.omninotes/4.7.2.apk",
-        "-o", "test_output",
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/com.mirfatif.permissionmanagerx/v1.26_PMX_v1.26.apk",
+        "-o", "test_case_3/test_matching",
+        "-replay_output", "test_case_3/record_output_v1_06_run3",
         "-is_emulator",
-        "-policy", "random_exploration",
-        "-count", "10",
-        "-d", "emulator-5554"
+        "-policy", "matching",
+        "-count", "100",
+        "-failed_replay_output", "test_case_3/replay_output_v1_26_PMX_v1_26_run3_for_v1_06",
+        "-d", "emulator-5556"
         ]
     },
 
     {
-        "name": "markor_record",
+        "name": "case_4_permissionmanagerx_dark_theme_loop",
         "type": "debugpy",
         "request": "launch",
         "console": "integratedTerminal",
         "program": "${workspaceFolder}/start.py",
-        "args": ["-a", "droidbot/select_apks/net.gsantner.markor/Markor_v2.10.0.apk",
-        "-o", "test_output",
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/com.mirfatif.permissionmanagerx/v1.23_PMX_v1.23.apk",
+        "-o", "test_case_4/test_matching",
+        "-replay_output", "test_case_4/record_output_v1_08_run3",
         "-is_emulator",
-        "-policy", "random_exploration",
-        "-count", "10",
+        "-policy", "matching",
+        "-count", "100",
+        "-failed_replay_output", "test_case_4/replay_output_v1_23_PMX_v1_23_run3_for_v1_08",
         "-d", "emulator-5556"
         ]
     },
+
     {
-        "name": "markor_replay_original",
+        "name": "case_5_permissionmanagerx_mark_issue",
         "type": "debugpy",
         "request": "launch",
         "console": "integratedTerminal",
         "program": "${workspaceFolder}/start.py",
-        "args": ["-a", "droidbot/select_apks/net.gsantner.markor/Markor_v2.10.0.apk",
-        "-replay_output", "test_output", 
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/com.mirfatif.permissionmanagerx/v1.17_PMX_v1.17.apk",
+        "-o", "test_case_5/test_matching",
+        "-replay_output", "test_case_5/record_output_v1_08_run2",
         "-is_emulator",
-        "-policy", "replay",
-        "-count", "10",
-        "-o","replay_output_original",
+        "-policy", "matching",
+        "-count", "100",
+        "-failed_replay_output", "test_case_5/replay_output_v1_17_PMX_v1_17_run2_for_v1_08",
         "-d", "emulator-5556"
         ]
     },
+
     {
-        "name": "start_bash_record_omninotes_parallel2",
-        "type": "debugpy",
-        "request": "launch",
-        "console": "integratedTerminal",
-        "program": "${workspaceFolder}/start_bash.py",
-        "args": [
-            "record",
-            "--csv-file", "droidbot/select_apks/it.feio.android.omninotes.csv",
-            "--apk-base", "droidbot/select_apks/it.feio.android.omninotes",
-            "--max-parallel", "2"
-        ]
-    },
-    {
-        "name": "anki_record",
+        "name": "case_6_permissionmanagerx_judge_error",
         "type": "debugpy",
         "request": "launch",
         "console": "integratedTerminal",
         "program": "${workspaceFolder}/start.py",
-        "args": ["-a", "droidbot/select_apks/com.ichi2.anki/AnkiDroid_2.22.3_AnkiDroid-2.22.3-full-universal.apk",
-        "-o", "test_output",
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/com.mirfatif.permissionmanagerx/v1.06.apk",
+        "-o", "test_case_6/test_matching",
+        "-replay_output", "test_case_6/record_output_v1_02_run3",
         "-is_emulator",
-        "-policy", "random_exploration",
+        "-policy", "matching",
         "-count", "100",
-        "-d", "emulator-5554"
-        ]
-    },
-    {
-        "name": "anki_replay",
-        "type": "debugpy",
-        "request": "launch",
-        "console": "integratedTerminal",
-        "program": "${workspaceFolder}/start.py",
-        "args": ["-a", "droidbot/select_apks/com.ichi2.anki/AnkiDroid_2.22.3_AnkiDroid-2.22.3-full-universal.apk",
-        "-replay_output", "test_output",
-        "-o", "replay_output",
-        "-is_emulator",
-        "-policy", "replay",
-        "-count", "100",
-        "-d", "emulator-5554"
-        ]
-    },
-    {
-        "name": "clock_replay",
-        "type": "debugpy",
-        "request": "launch",
-        "console": "integratedTerminal",
-        "program": "${workspaceFolder}/start.py",
-        "args": ["-a", "droidbot/select_apks/com.best.deskclock/Clock_2.25_Clock_2.25-release.apk",
-        "-replay_output", "test_output",
-        "-o", "replay_output",
-        "-is_emulator",
-        "-policy", "replay",
-        "-count", "10",
-        "-d", "emulator-5554"
-        ]
-    },
-    {
-        "name": "clock_record",
-        "type": "debugpy",
-        "request": "launch",
-        "console": "integratedTerminal",
-        "program": "${workspaceFolder}/start.py",
-        "args": ["-a", "droidbot/select_apks/com.best.deskclock/Clock_2.25_Clock_2.25-release.apk",
-        "-o", "test_output",
-        "-is_emulator",
-        "-policy", "random_exploration",
-        "-count", "10",
-        "-d", "emulator-5554"
-        ]
-    },
-    {
-        "name": "decision_maker_record",
-        "type": "debugpy",
-        "request": "launch",
-        "console": "integratedTerminal",
-        "program": "${workspaceFolder}/start.py",
-        "args": ["-a", "droidbot/select_apks/de.markusfisch.android.libra/Version_1.12.2.apk",
-        "-o", "test_output",
-        "-is_emulator",
-        "-policy", "random_exploration",
-        "-count", "10",
-        "-d", "emulator-5554"
-        ]
-    },
-    {
-        "name": "bible_record",
-        "type": "debugpy",
-        "request": "launch",
-        "console": "integratedTerminal",
-        "program": "${workspaceFolder}/start.py",
-        "args": ["-a", "droidbot/select_apks/com.quran.labs.androidquran/Quran_3.0.3_quran-3.0.3.apk",
-        "-o", "test_output",
-        "-is_emulator",
-        "-policy", "random_exploration",
-        "-count", "10",
-        "-d", "emulator-5554"
-        ]
-    },
-    {
-        "name": "demaker_repaly",
-        "type": "debugpy",
-        "request": "launch",
-        "console": "integratedTerminal",
-        "program": "${workspaceFolder}/start.py",
-        "args": ["-a", "droidbot/select_apks/de.markusfisch.android.libra/Version_1.12.2.apk",
-        "-replay_output", "record_output_Version_1_12_2_run2",
-        "-o", "replay_original",
-        "-is_emulator",
-        "-policy", "replay",
-        "-count", "100",
-        "-d", "emulator-5554"
-        ]
-    },
-    {
-        "name": "SkyTube_replay",
-        "type": "debugpy",
-        "request": "launch",
-        "console": "integratedTerminal",
-        "program": "${workspaceFolder}/start.py",
-        "args": ["-a", "droidbot/select_apks/is.xyz.mpv/2020-11-16_Build_mpv-android-2020-11-16.apk",
-        "-o", "record_test",
-        "-is_emulator",
-        "-policy", "random_exploration",
-        "-count", "30",
+        "-failed_replay_output", "test_case_6/replay_output_v1_06_run3_for_v1_02",
         "-d", "emulator-5556"
         ]
     },
+
+    {
+        "name": "case_7_permissionmanagerx_early_end",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/com.mirfatif.permissionmanagerx/v1.29-foss.apk",
+        "-o", "test_case_7/test_matching",
+        "-replay_output", "test_case_7/record_output_v1_13_PMX_v1_13_run2",
+        "-is_emulator",
+        "-policy", "matching",
+        "-count", "100",
+        "-failed_replay_output", "test_case_7/replay_output_v1_29-foss_run2_for_v1_13_PMX_v1_13",
+        "-d", "emulator-5556"
+        ]
+    },
+
+    {
+        "name": "case_8_filemanager_scroll",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/com.amaze.filemanager/v3.6.1.apk",
+        "-o", "test_case_8/test_matching",
+        "-replay_output", "test_case_8/record_output_v3_5_1_run2",
+        "-is_emulator",
+        "-policy", "matching",
+        "-count", "100",
+        "-failed_replay_output", "test_case_8/replay_output_v3_6_1_run2_for_v3_5_1",
+        "-d", "emulator-5556"
+        ]
+    },
+
+    {
+        "name": "case_9_filemanager",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/com.amaze.filemanager/v3.6.7.apk",
+        "-o", "test_case_9/test_matching",
+        "-replay_output", "test_case_9/record_output_v3_5_2_run3",
+        "-is_emulator",
+        "-policy", "matching",
+        "-count", "100",
+        "-failed_replay_output", "test_case_9/replay_output_v3_6_7_run3_for_v3_5_2",
+        "-d", "emulator-5556"
+        ]
+    },
+
+    {
+        "name": "case_10_filemanager",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/com.amaze.filemanager/v3.10.apk",
+        "-o", "test_case_10/test_matching",
+        "-replay_output", "test_case_10/record_output_v3_5_1_run2",
+        "-is_emulator",
+        "-policy", "matching",
+        "-count", "100",
+        "-failed_replay_output", "test_case_10/replay_output_v3_10_run2_for_v3_5_1",
+        "-d", "emulator-5556"
+        ]
+    },
+
+    {
+        "name": "case_11_filemanager",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/com.amaze.filemanager/v3.6.6.apk",
+        "-o", "test_case_11/test_matching",
+        "-replay_output", "test_case_11/record_output_v3_5_0_app-play-release-v2_run3",
+        "-is_emulator",
+        "-policy", "matching",
+        "-count", "100",
+        "-failed_replay_output", "test_case_11/replay_output_v3_6_6_run3_for_v3_5_0_app-play-release-v2",
+        "-d", "emulator-5556"
+        ]
+    },
+
+    {
+        "name": "case_12_filemanager_button_issue",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/com.amaze.filemanager/v3.8.1.apk",
+        "-o", "test_case_12/test_matching",
+        "-replay_output", "test_case_12/record_output_v3_6_1_run2",
+        "-is_emulator",
+        "-policy", "matching",
+        "-count", "100",
+        "-failed_replay_output", "test_case_12/replay_output_v3_8_1_run2_for_v3_6_1",
+        "-d", "emulator-5556"
+        ]
+    },
+
+    {
+        "name": "case_13_filemanager",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/com.amaze.filemanager/v3.10.apk",
+        "-o", "test_case_13/test_matching",
+        "-replay_output", "test_case_13/record_output_v3_7_0_run1",
+        "-is_emulator",
+        "-policy", "matching",
+        "-count", "100",
+        "-failed_replay_output", "test_case_13/replay_output_v3_10_run1_for_v3_7_0",
+        "-d", "emulator-5556"
+        ]
+    },
+
+    {
+        "name": "case_14_filemanager_three_dots",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/com.amaze.filemanager/v3.8.2.apk",
+        "-o", "test_case_14/test_matching",
+        "-replay_output", "test_case_14/record_output_v3_5_1_run3",
+        "-is_emulator",
+        "-policy", "matching",
+        "-count", "100",
+        "-failed_replay_output", "test_case_14/replay_output_v3_8_2_run3_for_v3_5_1",
+        "-d", "emulator-5556"
+        ]
+    },
+
+    {
+        "name": "case_15_filemanager_back_success",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/com.amaze.filemanager/v3.10.apk",
+        "-o", "test_case_15/test_matching",
+        "-replay_output", "test_case_15/record_output_v3_6_0_run2",
+        "-is_emulator",
+        "-policy", "matching",
+        "-count", "100",
+        "-failed_replay_output", "test_case_15/replay_output_v3_10_run2_for_v3_6_0",
+        "-d", "emulator-5556"
+        ]
+    },
+
+    {
+        "name": "case_16_filemanager_same_as_15",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/com.amaze.filemanager/v3.6.5.apk",
+        "-o", "test_case_16/test_matching",
+        "-replay_output", "test_case_16/record_output_v3_6_1_run1",
+        "-is_emulator",
+        "-policy", "matching",
+        "-count", "100",
+        "-failed_replay_output", "test_case_16/replay_output_v3_6_5_run1_for_v3_6_1",
+        "-d", "emulator-5556"
+        ]
+    },
+
+    {
+        "name": "case_17_nano_sidebar_issue",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/com.appmindlab.nano/v4.5.6.apk",
+        "-o", "test_case_17/test_matching",
+        "-replay_output", "test_case_17/record_output_v3_9_2_run2",
+        "-is_emulator",
+        "-policy", "matching",
+        "-count", "100",
+        "-failed_replay_output", "test_case_17/replay_output_v4_5_6_run2_for_v3_9_2",
+        "-d", "emulator-5556"
+        ]
+    },
+
+    {
+        "name": "case_18_nano_more_options_issue",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/com.appmindlab.nano/v4.5.1.apk",
+        "-o", "test_case_18/test_matching",
+        "-replay_output", "test_case_18/record_output_v4_0_8_run2",
+        "-is_emulator",
+        "-policy", "matching",
+        "-count", "100",
+        "-failed_replay_output", "test_case_18/replay_output_v4_5_1_run2_for_v4_0_8",
+        "-d", "emulator-5556"
+        ]
+    },
+
+    {
+        "name": "case_19_activitymanager_failure",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/com.activitymanager/5.4.10.apk",
+        "-o", "test_case_19/test_matching",
+        "-replay_output", "test_case_19/record_output_5_4_3_run3",
+        "-is_emulator",
+        "-policy", "matching",
+        "-count", "100",
+        "-failed_replay_output", "test_case_19/replay_output_5_4_10_run3_for_5_4_3",
+        "-d", "emulator-5556"
+        ]
+    },
+
+    {
+        "name": "case_20_activitymanager_4_1_3_to_5_4_7",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/com.activitymanager/5.4.7.apk",
+        "-o", "test_case_20/test_matching",
+        "-replay_output", "test_case_20/record_output_4_1_3_run2",
+        "-is_emulator",
+        "-policy", "matching",
+        "-count", "100",
+        "-failed_replay_output", "test_case_20/replay_output_5_4_7_run2_for_4_1_3",
+        "-d", "emulator-5556"
+        ]
+    },
+
+    {
+        "name": "case_21_activitymanager_4_2_0_to_5_4_8",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/com.activitymanager/5.4.8.apk",
+        "-o", "test_case_21/test_matching",
+        "-replay_output", "test_case_21/record_output_4_2_0_run2",
+        "-is_emulator",
+        "-policy", "matching",
+        "-count", "100",
+        "-failed_replay_output", "test_case_21/replay_output_5_4_8_run2_for_4_2_0",
+        "-d", "emulator-5556"
+        ]
+    },
+
+    {
+        "name": "case_22_activitymanager_4_1_0_to_5_4_15",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/com.activitymanager/5.4.15.apk",
+        "-o", "test_case_22/test_matching",
+        "-replay_output", "test_case_22/record_output_4_1_0_run1",
+        "-is_emulator",
+        "-policy", "matching",
+        "-count", "100",
+        "-failed_replay_output", "test_case_22/replay_output_5_4_15_run1_for_4_1_0",
+        "-d", "emulator-5556"
+        ]
+    },
+
+    {
+        "name": "case_23_activitymanager_5_3_1_to_5_4_13",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/com.activitymanager/5.4.13.apk",
+        "-o", "test_case_23/test_matching",
+        "-replay_output", "test_case_23/record_output_5_3_1_run1",
+        "-is_emulator",
+        "-policy", "matching",
+        "-count", "100",
+        "-failed_replay_output", "test_case_23/replay_output_5_4_13_run1_for_5_3_1",
+        "-d", "emulator-5556"
+        ]
+    },
+
+    {
+        "name": "case_24_catima_select_photos",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/me.hackerchick.catima/2.23.2.apk",
+        "-o", "test_case_24/test_matching",
+        "-replay_output", "test_case_24/record_output_2_16_3_run2",
+        "-is_emulator",
+        "-policy", "matching",
+        "-count", "100",
+        "-failed_replay_output", "test_case_24/replay_output_2_23_2_run2_for_2_16_3",
+        "-d", "emulator-5556"
+        ]
+    },
+
+    {
+        "name": "case_25_catima",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/me.hackerchick.catima/2.11.1.apk",
+        "-o", "test_case_25/test_matching",
+        "-replay_output", "test_case_25/record_output_1_6_1_run1",
+        "-is_emulator",
+        "-policy", "matching",
+        "-count", "100",
+        "-failed_replay_output", "test_case_25/replay_output_2_11_1_run1_for_1_6_1",
+        "-d", "emulator-5556"
+        ]
+    },
+
+    {
+        "name": "case_26_catima_yes_judge",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/me.hackerchick.catima/2.33.0.apk",
+        "-o", "test_case_26/test_matching",
+        "-replay_output", "test_case_26/record_output_2_17_1_run2",
+        "-is_emulator",
+        "-policy", "matching",
+        "-count", "100",
+        "-failed_replay_output", "test_case_26/replay_output_2_33_0_run2_for_2_17_1",
+        "-d", "emulator-5556"
+        ]
+    },
+
+    {
+        "name": "case_27_catima",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/me.hackerchick.catima/2.25.3.apk",
+        "-o", "test_case_27/test_matching",
+        "-replay_output", "test_case_27/record_output_2_18_2_run3",
+        "-is_emulator",
+        "-policy", "matching",
+        "-count", "100",
+        "-failed_replay_output", "test_case_27/replay_output_2_25_3_run3_for_2_18_2",
+        "-d", "emulator-5556"
+        ]
+    },
+
+    {
+        "name": "case_28_uhabits",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/org.isoron.uhabits/v2.1.3_loop-2.1.3-release.apk",
+        "-o", "test_case_28/test_matching",
+        "-replay_output", "test_case_28/record_output_v1_8_9_loop-1_8_9-release_run3",
+        "-is_emulator",
+        "-policy", "matching",
+        "-count", "100",
+        "-failed_replay_output", "test_case_28/replay_output_v2_1_3_loop-2_1_3-release_run3_for_v1_8_9_loop-1_8_9-release",
+        "-d", "emulator-5556"
+        ]
+    },
+
+    {
+        "name": "case_29_uhabits",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/org.isoron.uhabits/v2.0.2_loop-2.0.2-release.apk",
+        "-o", "test_case_29/test_matching",
+        "-replay_output", "test_case_29/record_output_v1_8_12_loop-1_8_12-release_run2",
+        "-is_emulator",
+        "-policy", "matching",
+        "-count", "100",
+        "-failed_replay_output", "test_case_29/replay_output_v2_0_2_loop-2_0_2-release_run2_for_v1_8_12_loop-1_8_12-release",
+        "-d", "emulator-5556"
+        ]
+    },
+
+    {
+        "name": "case_30_uhabits",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/org.isoron.uhabits/v2.0.1_loop-2.0.1-release.apk",
+        "-o", "test_case_30/test_matching",
+        "-replay_output", "test_case_30/record_output_v1_8_11_run1",
+        "-is_emulator",
+        "-policy", "matching",
+        "-count", "100",
+        "-failed_replay_output", "test_case_30/replay_output_v2_0_1_loop-2_0_1-release_run1_for_v1_8_11",
+        "-d", "emulator-5556"
+        ]
+    },
+
+    // ========== New Test Cases 31-39 ==========
+
+    {
+        "name": "case_31_anitrend",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/com.mxt.anitrend/Bump_version_from_1.9.8_to_1.9.9_app-release.apk",
+        "-o", "test_case_31/test_matching",
+        "-replay_output", "test_case_31/record_output_Bump_version_from_1_8_11_to_1_8_12_app-release_run3",
+        "-is_emulator",
+        "-policy", "matching",
+        "-count", "100",
+        "-failed_replay_output", "test_case_31/replay_output_Bump_version_from_1_9_8_to_1_9_9_app-release_run3_for_Bump_version_from_1_8_11_to_1_8_12_app-release",
+        "-d", "emulator-5556"
+        ]
+    },
+
+    {
+        "name": "case_32_privacyfriendlynotes",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/org.secuso.privacyfriendlynotes/Notes_(Privacy_Friendly)_v2.0.4.apk",
+        "-o", "test_case_32/test_matching",
+        "-replay_output", "test_case_32/record_output_Notes__Privacy_Friendly__v1_2_1_run2",
+        "-is_emulator",
+        "-policy", "matching",
+        "-count", "100",
+        "-failed_replay_output", "test_case_32/replay_output_Notes__Privacy_Friendly__v2_0_4_run2_for_Notes__Privacy_Friendly__v1_2_1",
+        "-d", "emulator-5556"
+        ]
+    },
+
+    {
+        "name": "case_33_faircode_email",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/eu.faircode.email/1.2051_Quetecsaurus.apk",
+        "-o", "test_case_33/test_matching",
+        "-replay_output", "test_case_33/record_output_1_1964_Ledumahadi_run2",
+        "-is_emulator",
+        "-policy", "matching",
+        "-count", "100",
+        "-failed_replay_output", "test_case_33/replay_output_1_2051_Quetecsaurus_run2_for_1_1964_Ledumahadi",
+        "-d", "emulator-5556"
+        ]
+    },
+
+    {
+        "name": "case_34_familygem",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/app.familygem/Family_Gem_0.9.2.apk",
+        "-o", "test_case_34/test_matching",
+        "-replay_output", "test_case_34/record_output_Family_Gem_0_7_15_run2",
+        "-is_emulator",
+        "-policy", "matching",
+        "-count", "100",
+        "-failed_replay_output", "test_case_34/replay_output_Family_Gem_0_9_2_run2_for_Family_Gem_0_7_15",
+        "-d", "emulator-5556"
+        ]
+    },
+
+    {
+        "name": "case_35_zhanghai_files_failure",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/me.zhanghai.android.files/v1.6.1.apk",
+        "-o", "test_case_35/test_matching",
+        "-replay_output", "test_case_35/record_output_v1_5_0_run2",
+        "-is_emulator",
+        "-policy", "matching",
+        "-count", "100",
+        "-failed_replay_output", "test_case_35/replay_output_v1_6_1_run2_for_v1_5_0",
+        "-d", "emulator-5556"
+        ]
+    },
+
+    {
+        "name": "case_36_liberario_transportr",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/de.grobox.liberario/Transportr_2.2.2.apk",
+        "-o", "test_case_36/test_matching",
+        "-replay_output", "test_case_36/record_output_Transportr_2_1_4_run3",
+        "-is_emulator",
+        "-policy", "matching",
+        "-count", "100",
+        "-failed_replay_output", "test_case_36/replay_output_Transportr_2_2_2_run3_for_Transportr_2_1_4",
+        "-d", "emulator-5556"
+        ]
+    },
+
+    {
+        "name": "case_37_retromusic_hardcase",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/code.name.monkey.retromusic/Release_v5.4.2_-_Open_beta.apk",
+        "-o", "test_case_37/test_matching",
+        "-replay_output", "test_case_37/record_output_v4_4_0_-_Open_Beta_run3",
+        "-is_emulator",
+        "-policy", "matching",
+        "-count", "100",
+        "-failed_replay_output", "test_case_37/replay_output_Release_v5_4_2_-_Open_beta_run3_for_v4_4_0_-_Open_Beta",
+        "-d", "emulator-5556"
+        ]
+    },
+
+    {
+        "name": "case_38_privacyfriendlytodolist",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/org.secuso.privacyfriendlytodolist/ToDo_List_(Privacy_Friendly)_v3.3.1.apk",
+        "-o", "test_case_38/test_matching",
+        "-replay_output", "test_case_38/record_output_ToDo_List__Privacy_Friendly__v2_4_0_run2",
+        "-is_emulator",
+        "-policy", "matching",
+        "-count", "100",
+        "-failed_replay_output", "test_case_38/replay_output_ToDo_List__Privacy_Friendly__v3_3_1_run2_for_ToDo_List__Privacy_Friendly__v2_4_0",
+        "-d", "emulator-5556"
+        ]
+    },
+
+    {
+        "name": "case_39_omninotes_failure",
+        "type": "debugpy",
+        "request": "launch",
+        "console": "integratedTerminal",
+        "program": "${workspaceFolder}/start.py",
+        "envFile": "${workspaceFolder}/.env",
+        "args": ["-a", "droidbot/select_apks/it.feio.android.omninotes/6.2.3.apk",
+        "-o", "test_case_39/test_matching",
+        "-replay_output", "test_case_39/record_output_6_2_2_run1",
+        "-is_emulator",
+        "-policy", "matching",
+        "-count", "100",
+        "-failed_replay_output", "test_case_39/replay_output_6_2_3_run1_for_6_2_2",
+        "-d", "emulator-5556"
+        ]
+    }
 
     ]
 }

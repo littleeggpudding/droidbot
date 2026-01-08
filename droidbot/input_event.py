@@ -760,40 +760,88 @@ class ScrollEvent(UIEvent):
         direction = random.choice(["up", "down", "left", "right"])
         return ScrollEvent(x, y, direction)
 
-    def send(self, device):
-        resourceId = self.view['resource_id']
-        className = self.view['class']
-        instance = self.view['instance']
+    def send(self, device, probe=False):
+        """
+        发送scroll事件
+
+        Args:
+            device: 设备对象
+            probe: 是否为探测模式，True时使用较小的滑动距离（1/20=5%），False时使用正常距离（2/5=40%）
+        """
+        # probe模式使用小距离滑动（5%），正常模式使用大距离（40%）
+        # 5%的滑动通常足以让一些元素进入/离开视野，触发state_str变化
+        scroll_ratio = 1 / 6 if probe else 2 / 5
+
+        if self.u2 is not None:
+            resourceId = self.view['resource_id']
+            className = self.view['class']
+            instance = self.view['instance']
+
+            # probe模式使用较少的steps
+            steps = 5 if probe else 100
+
+            if self.direction.upper() == "DOWN":
+                self.u2(
+                    className=className,
+                    resourceId=resourceId,
+                    instance=instance
+                ).scroll.vert.backward(steps=steps)
+            elif self.direction.upper() == "UP":
+                self.u2(
+                    className=className,
+                    resourceId=resourceId,
+                    instance=instance
+                ).scroll.vert.forward(steps=steps)
+            elif self.direction.upper() == "LEFT":
+                self.u2(
+                    className=className,
+                    resourceId=resourceId,
+                    instance=instance
+                ).scroll.horiz.forward(max_swipes=steps)
+            elif self.direction.upper() == "RIGHT":
+                self.u2(
+                    className=className,
+                    resourceId=resourceId,
+                    instance=instance
+                ).scroll.horiz.backward(max_swipes=steps)
 
 
-        if self.direction == "DOWN":
-            self.u2(
-                className=className,
-                resourceId=resourceId,
-                instance=instance
-            ).scroll.vert.backward(steps=100)
-        elif self.direction == "UP":
-            self.u2(
-                className=className,
-                resourceId=resourceId,
-                instance=instance
-            ).scroll.vert.forward(steps=100)
-        elif self.direction == "LEFT":
-            self.u2(
-                className=className,
-                resourceId=resourceId,
-                instance=instance
-            ).scroll.horiz.forward(max_swipes=100)
-        elif self.direction == "RIGHT":
-            self.u2(
-                className=className,
-                resourceId=resourceId,
-                instance=instance
-            ).scroll.horiz.backward(max_swipes=100)
+            time.sleep(0.5)
+            return True
+        else:
+            if self.view is not None:
+                from .device_state import DeviceState
+                width = DeviceState.get_view_width(view_dict=self.view)
+                height = DeviceState.get_view_height(view_dict=self.view)
+            else:
+                width = device.get_width()
+                height = device.get_height()
 
-        
-        time.sleep(0.5)
-        return True
+            x, y = UIEvent.get_xy(x=self.x, y=self.y, view=self.view)
+            if not x or not y:
+                # If no view and no coordinate specified, use the screen center coordinate
+                x = width / 2
+                y = height / 2
+
+            start_x, start_y = x, y
+            end_x, end_y = x, y
+            duration = 150 if probe else 500  # probe模式使用更短的duration
+
+            if self.direction.upper() == "UP":
+                start_y -= height * scroll_ratio
+                end_y += height * scroll_ratio
+            elif self.direction.upper() == "DOWN":
+                start_y += height * scroll_ratio
+                end_y -= height * scroll_ratio
+            elif self.direction.upper() == "LEFT":
+                start_x -= width * scroll_ratio
+                end_x += width * scroll_ratio
+            elif self.direction.upper() == "RIGHT":
+                start_x += width * scroll_ratio
+                end_x -= width * scroll_ratio
+
+            device.view_drag((start_x, start_y), (end_x, end_y), duration)
+            return True
 
 
     def get_event_str(self, state):

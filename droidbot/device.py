@@ -486,13 +486,18 @@ class Device(object):
             cmd = intent
         return self.adb.shell(cmd)
 
-    def send_event(self, event):
+    def send_event(self, event, probe=False):
         """
         send one event to device
         :param event: the event to be sent
+        :param probe: 是否为探测模式（仅对ScrollEvent有效），True时使用较小的滑动距离
         :return:
         """
-        event.send(self)
+        from .input_event import ScrollEvent
+        if isinstance(event, ScrollEvent):
+            event.send(self, probe=probe)
+        else:
+            event.send(self)
 
     def start_app(self, app):
         """
@@ -938,7 +943,7 @@ class Device(object):
         """
         Install the files to the device for the app
         """
-        if "com.atul.musicplayer" in app_package or "com.github.anrimian.musicplayer" in app_package or "remix.myplayer" in app_package or "org.gateshipone.odyssey" in app_package or "com.github.pakka_papad" in app_package or "code.name.monkey.retromusic" in app_package or "org.oxycblt.auxio" in app_package:
+        if "com.atul.musicplayer" in app_package or "com.github.anrimian.musicplayer" in app_package or "remix.myplayer" in app_package or "org.gateshipone.odyssey" in app_package or "com.github.pakka_papad" in app_package or "code.name.monkey.retromusic" in app_package or "org.oxycblt.auxio" in app_package or "com.arn.scrobble" in app_package or "com.zionhuang.music" in app_package or "player.phonograph.plus" in app_package:
             self.push_file("droidbot/Document/Heartbeat.mp3", "/sdcard/Music/")
             self.push_file("droidbot/Document/intermission.mp3", "/sdcard/Music/")
             self.push_file("droidbot/Document/ThingsWeCantIgnore.mp3", "/sdcard/Music/")
@@ -979,8 +984,18 @@ class Device(object):
             self.adb.shell("am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Download/hip-hop.mp3")
 
 
+        elif app_package == "universe.constellation.orion.viewer":
+            # 放在download目录下
 
+            # 1. image
+            self.push_file("droidbot/Document/Android_logo.jpg", "/sdcard/Download/")
+            self.push_file("droidbot/Document/Android_robot.png", "/sdcard/Download/")
 
+            # 2. pdf
+            self.push_file("droidbot/Document/test.pdf", "/sdcard/Download/")
+            self.adb.shell("am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Download/Android_logo.jpg")
+            self.adb.shell("am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Download/Android_robot.png")
+            self.adb.shell("am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Download/test.pdf")
 
 
 
@@ -1057,8 +1072,137 @@ class Device(object):
             self.skip_newpipe_welcome()
         elif app_package == "com.onlyoffice.documents":
             self.skip_documents_welcome()
+        elif app_package == "com.appmindlab.nano":
+            self.skip_nano_welcome()
+        elif app_package == "at.jclehner.rxdroid":
+            self.skip_rxdroid_welcome()
+        elif app_package == "player.phonograph.plus":
+            self.skip_phonograph_welcome()
+        elif app_package == "free.rm.skytube.oss":
+            self.skip_skytube_welcome()
         else:
             return
+
+    def skip_skytube_welcome(self):
+        """
+        Skip the SkyTube welcome/onboarding screens
+        1. click "Get Started"
+        """
+        try:
+            skip_button = self.u2(text="OK")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(0.5)
+
+            skip_button = self.u2(text="LATER")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(0.5)
+
+            # Refresh x3
+            for _ in range(3):
+                try:
+                    # 下拉刷新——根据标准屏幕比例
+                    self.u2.swipe(0.5, 0.25, 0.5, 0.85, 0.2)
+                    time.sleep(0.8)  # 给页面时间刷新
+                except Exception as swipe_err:
+                    print(f"Refresh swipe failed: {swipe_err}")
+            
+           
+            return True
+        except Exception as e:
+            print(f"Error during Phonograph welcome screen skip: {e}")
+            return False
+           
+
+    def skip_phonograph_welcome(self):
+        """
+        Skip the Phonograph welcome/onboarding screens
+        1. click "Get Started"
+        """
+        try:
+            for i in range(6):
+                skip_button = self.u2(description="NEXT")
+                if skip_button.exists():
+                    skip_button.click()
+                    time.sleep(0.5)
+
+                skip_button = self.u2(text="DONE")
+                if skip_button.exists():
+                    skip_button.click()
+                    time.sleep(0.5)
+
+                skip_button = self.u2(text="disable")
+                if skip_button.exists():
+                    skip_button.click()
+                    time.sleep(0.5)
+
+                skip_button = self.u2(text="GET STARTED")
+                if skip_button.exists():
+                    skip_button.click()
+                    time.sleep(0.5)
+
+                i += 1
+
+            skip_button = self.u2(text="OK")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(0.5)
+
+            return True
+        except Exception as e:
+            print(f"Error during Phonograph welcome screen skip: {e}")
+            return False
+
+    def skip_rxdroid_welcome(self):
+        """
+        Skip the Rxdroid welcome/onboarding screens
+        1. click "Get Started"
+        """
+        try:
+            skip_button = self.u2(text="OK")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(0.5)
+            return True
+        except Exception as e:
+            print(f"Error during Rxdroid welcome screen skip: {e}")
+            return False
+
+    def skip_nano_welcome(self):
+        """
+        Skip the Nano welcome/onboarding screens
+        1. click "Get Started"
+        """
+        try:
+            skip_button = self.u2(text="SKIP")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(0.5)
+
+            skip_button = self.u2(text="ACCEPT")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(0.5)
+
+            skip_button = self.u2(text="USE DEFAULT")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(0.5)
+
+            skip_button = self.u2(text="OK")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(0.5)
+
+            skip_button = self.u2(text="Allow")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(0.5)
+            return True
+        except Exception as e:
+            print(f"Error during Nano welcome screen skip: {e}")
+            return False
 
     def skip_documents_welcome(self):
 
@@ -1141,9 +1285,38 @@ class Device(object):
         1. click "Get Started"
         """
         try:
-            # Back
-            self.u2.press("BACK")
-            time.sleep(0.5)
+            
+            if self.u2(text="Welcome").exists:
+                flag1 = False
+                skip_button = self.u2(text="Done")
+                if skip_button.exists() and flag1 == False:
+                    skip_button.click()
+                    time.sleep(0.5)
+                    flag1 = True
+
+                skip_button = self.u2(text="DONE")
+                if skip_button.exists() and flag1 == False:
+                    skip_button.click()
+                    time.sleep(0.5)
+                    flag1 = True
+
+                if flag1 != True: # welcome的特殊处理
+                    self.u2.press("BACK")
+                    time.sleep(0.5)
+
+            
+            flag2 = False #更新页面的特殊处理
+            skip_button = self.u2(text="Close")
+            if skip_button.exists() and flag2 == False:
+                skip_button.click()
+                time.sleep(0.5)
+                flag2 = True
+
+            skip_button = self.u2(text="Cancel")
+            if skip_button.exists() and flag2 == False:
+                skip_button.click()
+                time.sleep(0.5)
+                flag2 = True
 
             return True
         except Exception as e:
@@ -1173,11 +1346,7 @@ class Device(object):
         1. click "Get Started"
         """
         try:
-            skip_button = self.u2(description="Get started!")
-            if skip_button.exists():
-                skip_button.click()
-                time.sleep(0.5)
-            for i in range(5):
+            for i in range(6):
                 skip_button = self.u2(description="NEXT")
                 if skip_button.exists():
                     skip_button.click()
@@ -1189,6 +1358,11 @@ class Device(object):
                     time.sleep(0.5)
 
                 skip_button = self.u2(text="Allow")
+                if skip_button.exists():
+                    skip_button.click()
+                    time.sleep(0.5)
+
+                skip_button = self.u2(description="Get started!")
                 if skip_button.exists():
                     skip_button.click()
                     time.sleep(0.5)
@@ -1279,6 +1453,13 @@ class Device(object):
             if skip_button.exists():
                 skip_button.click()
                 time.sleep(0.5)
+
+            skip_button = self.u2(text="CANCEL")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(0.5)
+
+
             
             return True
         except Exception as e:
@@ -1405,12 +1586,25 @@ class Device(object):
         try:
             # Step 1: click Allow
             for i in range(5):
-                skip_button = self.u2(description="NEXT")
+                # skip_button = self.u2(description="NEXT")
+                # if skip_button.exists():
+                #     skip_button.click()
+                #     time.sleep(0.5)
+
+                # org.isoron.uhabits:id/next
+                skip_button = self.u2(resourceId="org.isoron.uhabits:id/next")
                 if skip_button.exists():
                     skip_button.click()
                     time.sleep(0.5)
 
-                skip_button = self.u2(description="DONE")
+                # skip_button = self.u2(description="DONE")
+                # if skip_button.exists():
+                #     skip_button.click()
+                #     time.sleep(0.5)
+                #     break
+
+                # org.isoron.uhabits:id/done
+                skip_button = self.u2(resourceId="org.isoron.uhabits:id/done")
                 if skip_button.exists():
                     skip_button.click()
                     time.sleep(0.5)
@@ -1491,6 +1685,11 @@ class Device(object):
         1. click "Get Started"
         """
         try:
+            skip_button = self.u2(text="NOT NOW")
+            if skip_button.exists():
+                skip_button.click()
+                time.sleep(0.5)
+
             # Step 1: click Allow
             skip_button = self.u2(text="OK")
             if skip_button.exists():
@@ -1642,7 +1841,7 @@ class Device(object):
                 skip_button.click()
                 time.sleep(1)
 
-            time.sleep(60)
+            time.sleep(120)
             return True
         except Exception as e:
             print(f"Error during Quran welcome screen skip: {e}")

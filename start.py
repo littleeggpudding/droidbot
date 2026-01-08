@@ -89,6 +89,14 @@ def parse_args():
                         help="Ignore Ad views by checking resource_id.")
     parser.add_argument("-replay_output", action="store", dest="replay_output",
                         help="The droidbot output directory being replayed.")
+    
+
+    # 指定一个gt的文件夹
+    parser.add_argument("-ground_truth_path", action="store", dest="ground_truth_path",
+                        help="The path to the ground truth output.")
+
+    parser.add_argument("-failed_replay_output", action="store", dest="failed_replay_output",
+                        help="The path to the former failed replay output.")
     options = parser.parse_args()
     # print options
     return options
@@ -139,7 +147,10 @@ def main():
             qemu_no_graphic=opts.qemu_no_graphic,
             humanoid=opts.humanoid,
             ignore_ad=opts.ignore_ad,
-            replay_output=opts.replay_output)
+            replay_output=opts.replay_output,
+            ground_truth_path=opts.ground_truth_path,
+            failed_replay_output = opts.failed_replay_output
+            )
         droidmaster.start()
     else:
         droidbot = DroidBot(
@@ -165,10 +176,16 @@ def main():
             master=opts.master,
             humanoid=opts.humanoid,
             ignore_ad=opts.ignore_ad,
-            replay_output=opts.replay_output)
+            replay_output=opts.replay_output,
+            ground_truth_path=opts.ground_truth_path,
+            failed_replay_output = opts.failed_replay_output)
         droidbot.start()
     return
 
 
 if __name__ == "__main__":
+    import time
+    start_time = time.time()
     main()
+    end_time = time.time()
+    print(f"Time taken: {end_time - start_time} seconds")

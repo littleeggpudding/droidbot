@@ -44,7 +44,9 @@ class DroidBot(object):
                  master=None,
                  humanoid=None,
                  ignore_ad=False,
-                 replay_output=None):
+                 replay_output=None,
+                 ground_truth_path=None,
+                 failed_replay_output=None):
         """
         initiate droidbot with configurations
         :return:
@@ -109,7 +111,10 @@ class DroidBot(object):
                 script_path=script_path,
                 profiling_method=profiling_method,
                 master=master,
-                replay_output=replay_output)
+                replay_output=replay_output,
+                ground_truth_path=ground_truth_path,
+                failed_replay_output=failed_replay_output,
+                output_dir=output_dir)
         except Exception:
             import traceback
             traceback.print_exc()

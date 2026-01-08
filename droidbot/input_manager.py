@@ -9,7 +9,9 @@ from .input_policy import RANDOM_EXPLORATION, RandomExplorationPolicy, UtgBasedI
                          POLICY_NAIVE_DFS, POLICY_GREEDY_DFS, \
                          POLICY_NAIVE_BFS, POLICY_GREEDY_BFS, \
                          POLICY_REPLAY, POLICY_MEMORY_GUIDED, POLICY_LLM_GUIDED, \
-                         POLICY_MANUAL, POLICY_MONKEY, POLICY_NONE
+                         POLICY_MANUAL, POLICY_MONKEY, POLICY_NONE, GROUND_TRUTH, GroundTruthPolicy, \
+                         MATCHING, MatchingPolicy \
+                         
 
 DEFAULT_POLICY = RANDOM_EXPLORATION
 DEFAULT_EVENT_INTERVAL = 1
@@ -29,7 +31,7 @@ class InputManager(object):
     def __init__(self, device, app, policy_name, random_input,
                  event_count, event_interval,
                  script_path=None, profiling_method=None, master=None,
-                 replay_output=None):
+                 replay_output=None, ground_truth_path=None, failed_replay_output=None, output_dir=None):
         """
         manage input event sent to the target device
         :param device: instance of Device
@@ -50,7 +52,9 @@ class InputManager(object):
         self.event_count = event_count
         self.event_interval = event_interval
         self.replay_output = replay_output
-
+        self.ground_truth_path = ground_truth_path
+        self.failed_replay_output = failed_replay_output
+        self.output_dir = output_dir
         self.monkey = None
 
         if script_path is not None:
@@ -81,6 +85,10 @@ class InputManager(object):
             input_policy = LLM_Guided_Policy(device, app, self.random_input)
         elif self.policy_name == POLICY_REPLAY:
             input_policy = UtgReplayPolicy(device, app, self.replay_output)
+        elif self.policy_name == GROUND_TRUTH:
+            input_policy = GroundTruthPolicy(device, app, self.replay_output, self.ground_truth_path)
+        elif self.policy_name == MATCHING:
+            input_policy = MatchingPolicy(device, app, self.replay_output, self.failed_replay_output, self.output_dir)
         else:
             self.logger.warning("No valid input policy specified. Using policy \"none\".")
             input_policy = None

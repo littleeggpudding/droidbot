@@ -414,7 +414,7 @@ class DeviceState(object):
             depth += 1
         return -1
 
-    def get_possible_input(self):
+    def get_possible_input(self, package_name=None):
         """
         Get a list of possible input events for this state
         :return: list of InputEvent
@@ -477,6 +477,88 @@ class DeviceState(object):
 
         # For old Android navigation bars
         # possible_events.append(KeyEvent(name="MENU"))
+
+        for view_id in enabled_view_ids:
+            if view_id in touch_exclude_view_ids:
+                continue
+            children = self.__safe_dict_get(self.views[view_id], 'children')
+            if children and len(children) > 0:
+                continue
+            if self.__safe_dict_get(
+                self.views[view_id], 'clickable'
+            ) or self.__safe_dict_get(self.views[view_id], 'checkable'):
+                possible_events.append(TouchEvent(view=self.views[view_id]))
+
+            if package_name and ("com.atul.musicplayer" in package_name or "com.activitymanager" in package_name or "net.bible.android.activity" in package_name or "ua.syt0r.kanji" in package_name):
+                    focus_list = ["android.widget.RadioButton", "android.widget.ImageView", "android.widget.View", "android.widget.CheckBox", "android.widget.Button", "android.widget.Switch",
+                                  "android.widget.ImageButton", "android.widget.TextView", "android.widget.CheckedTextView", "android.widget.TableRow", "android.widget.EditText", "android.support.v7.widget.ar"]
+                    if self.views[view_id]['class'] in focus_list:
+                        possible_events.append(TouchEvent(view=self.views[view_id]))
+
+            if package_name and "org.isoron.uhabits" in package_name:
+                focus_list = ["android.widget.FrameLayout"]
+                if self.views[view_id]['class'] in focus_list:
+                    possible_events.append(SetTextEvent(view=self.views[view_id], text="Hello World"))
+
+            if package_name and ("com.inspiredandroid.linuxcommandbibliotheca" in package_name):
+                focus_list = ["android.view.View"]
+                if self.views[view_id]['class'] in focus_list:
+                    possible_events.append(TouchEvent(view=self.views[view_id]))
+
+
+            if package_name and ("code.name.monkey.retromusic" in package_name or "org.schabi.newpipe" in package_name):
+                focus_list = ["android.widget.ImageView"]
+                if self.views[view_id]['class'] in focus_list:
+                    possible_events.append(TouchEvent(view=self.views[view_id]))
+
+            if package_name and ("com.parseus.codecinfo" in package_name or "de.grobox.liberario" in package_name or "com.arn.scrobble" in package_name or "player.phonograph.plus" in package_name):
+                focus_list = ["android.widget.TextView"]
+                if self.views[view_id]['class'] in focus_list:
+                    possible_events.append(TouchEvent(view=self.views[view_id]))
+
+            if package_name and ("com.cookiegames.smartcookie" in package_name):
+                focus_list = ["android.view.View", "android.widget.TextView"]
+                if self.views[view_id]['class'] in focus_list:
+                    possible_events.append(TouchEvent(view=self.views[view_id]))
+
+            
+            if package_name and "com.onlyoffice.documents" in package_name:
+                focus_list = ["android.widget.ImageView", "android.widget.TextView"]
+                if self.views[view_id]['class'] in focus_list:
+                    possible_events.append(TouchEvent(view=self.views[view_id]))
+
+            if package_name and "com.gbros.tabslite" in package_name:
+                focus_list = ["android.widget.Button", "android.widget.TextView"]
+                if self.views[view_id]['class'] in focus_list:
+                    possible_events.append(TouchEvent(view=self.views[view_id]))
+
+            
+            if package_name and "universe.constellation.orion.viewer" in package_name:
+                focus_list = ["android.widget.ImageView"]
+                if self.views[view_id]['class'] in focus_list:
+                    possible_events.append(TouchEvent(view=self.views[view_id]))
+
+
+            if package_name and "com.kgurgul.cpuinfo" in package_name:
+                focus_list = ["android.widget.TextView", "android.widget.ImageView"]
+                if self.views[view_id]['class'] in focus_list:
+                    possible_events.append(TouchEvent(view=self.views[view_id]))
+
+            if package_name and "org.zephyrsoft.trackworktime" in package_name:
+                focus_list = ["android.widget.CheckedTextView"]
+                if self.views[view_id]['class'] in focus_list:
+                    possible_events.append(TouchEvent(view=self.views[view_id]))
+
+            
+            if package_name and "eu.faircode.email" in package_name:
+                focus_list = ["android.widget.TextView"]
+                if self.views[view_id]['class'] in focus_list:
+                    possible_events.append(TouchEvent(view=self.views[view_id]))
+
+            if package_name and "universe.constellation.orion.viewer" in package_name:
+                focus_list = ["android.widget.CheckedTextView","android.widget.TextView"]
+                if self.views[view_id]['class'] in focus_list:
+                    possible_events.append(TouchEvent(view=self.views[view_id]))
 
         self.possible_events = possible_events
         return [] + possible_events
@@ -567,7 +649,7 @@ class DeviceState(object):
                 if self.views[view_id]['class'] in focus_list:
                     possible_events.append(TouchEvent(view=self.views[view_id]))
 
-            if package_name and ("com.parseus.codecinfo" in package_name or "de.grobox.liberario" in package_name):
+            if package_name and ("com.parseus.codecinfo" in package_name or "de.grobox.liberario" in package_name or "com.arn.scrobble" in package_name or "player.phonograph.plus" in package_name):
                 focus_list = ["android.widget.TextView"]
                 if self.views[view_id]['class'] in focus_list:
                     possible_events.append(TouchEvent(view=self.views[view_id]))
@@ -582,6 +664,40 @@ class DeviceState(object):
                 focus_list = ["android.widget.ImageView", "android.widget.TextView"]
                 if self.views[view_id]['class'] in focus_list:
                     possible_events.append(TouchEvent(view=self.views[view_id]))
+
+            if package_name and "com.gbros.tabslite" in package_name:
+                focus_list = ["android.widget.Button", "android.widget.TextView"]
+                if self.views[view_id]['class'] in focus_list:
+                    possible_events.append(TouchEvent(view=self.views[view_id]))
+
+            
+            if package_name and "universe.constellation.orion.viewer" in package_name:
+                focus_list = ["android.widget.ImageView"]
+                if self.views[view_id]['class'] in focus_list:
+                    possible_events.append(TouchEvent(view=self.views[view_id]))
+
+
+            if package_name and "com.kgurgul.cpuinfo" in package_name:
+                focus_list = ["android.widget.TextView", "android.widget.ImageView"]
+                if self.views[view_id]['class'] in focus_list:
+                    possible_events.append(TouchEvent(view=self.views[view_id]))
+
+            if package_name and "org.zephyrsoft.trackworktime" in package_name:
+                focus_list = ["android.widget.CheckedTextView"]
+                if self.views[view_id]['class'] in focus_list:
+                    possible_events.append(TouchEvent(view=self.views[view_id]))
+
+            
+            if package_name and "eu.faircode.email" in package_name:
+                focus_list = ["android.widget.TextView"]
+                if self.views[view_id]['class'] in focus_list:
+                    possible_events.append(TouchEvent(view=self.views[view_id]))
+
+            if package_name and "universe.constellation.orion.viewer" in package_name:
+                focus_list = ["android.widget.CheckedTextView","android.widget.TextView"]
+                if self.views[view_id]['class'] in focus_list:
+                    possible_events.append(TouchEvent(view=self.views[view_id]))
+            
 
 
 
